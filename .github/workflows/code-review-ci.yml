@@ -1,0 +1,499 @@
+name: AI Code Review
+
+on:
+  pull_request_target:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+    branches:
+      - main
+      - v2
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: ai-code-review-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  ai_code_review_for_pr:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.pull_request.draft == false }}
+
+    env:
+      MR_OPENAI_API_KEY: ${{ secrets.MR_OPENAI_API_KEY }}
+      MR_OPENAI_API_URL: ${{ secrets.MR_OPENAI_API_URL }}
+      AI_REVIEW_PROMPT: ${{ secrets.AI_REVIEW_PROMPT }}
+      AI_REVIEW_MODEL: ${{ vars.AI_REVIEW_MODEL }}
+      MAX_DIFF_CHARS: ${{ vars.AI_REVIEW_MAX_DIFF_CHARS }}
+
+    steps:
+      - name: Check environment
+        shell: bash
+        run: |
+          echo "=== Environment Diagnostics ==="
+          echo "runner.os: $RUNNER_OS"
+          echo "runner.arch: $RUNNER_ARCH"
+          echo "---"
+          echo -n "python3 available: "; command -v python3 && python3 --version || echo "NOT FOUND"
+          echo -n "python  available: "; command -v python  && python  --version || echo "NOT FOUND"
+          echo -n "curl    available: "; command -v curl    && curl --version | head -1 || echo "NOT FOUND"
+          echo "PATH=$PATH"
+          echo "=== End Diagnostics ==="
+
+      - name: Normalize GitHub App private key
+        id: app-key
+        shell: bash
+        env:
+          GH_APP_PRIVATE_KEY_RAW: ${{ secrets.GH_APP_PRIVATE_KEY }}
+        run: |
+          set -euo pipefail
+
+          key="$(
+            python3 - <<'PY'
+          import base64
+          import os
+          import re
+          import sys
+
+          raw = os.environ.get("GH_APP_PRIVATE_KEY_RAW", "").strip()
+          if (raw.startswith('"') and raw.endswith('"')) or (raw.startswith("'") and raw.endswith("'")):
+              raw = raw[1:-1]
+
+          if "\\n" in raw:
+              print("[ai-review] private key contains literal \\\\n, normalizing", file=sys.stderr)
+              raw = raw.replace("\\n", "\n")
+          elif "-----BEGIN " not in raw and re.fullmatch(r"[A-Za-z0-9+/=\s]+", raw or ""):
+              print("[ai-review] private key looks base64 encoded, decoding", file=sys.stderr)
+              raw = base64.b64decode(re.sub(r"\s+", "", raw)).decode("utf-8")
+
+          raw = raw.replace("\r\n", "\n").replace("\r", "\n").strip()
+
+          match = re.match(r"^(-----BEGIN [^-]+-----)\s*(.*?)\s*(-----END [^-]+-----)$", raw, re.S)
+          if not match:
+              print("::error::GH_APP_PRIVATE_KEY must be a full GitHub App PEM private key, or base64 of the full PEM file.", file=sys.stderr)
+              sys.exit(1)
+
+          header, body, footer = match.groups()
+          body = re.sub(r"\s+", "", body)
+          if not body:
+              print("::error::GH_APP_PRIVATE_KEY PEM body is empty.", file=sys.stderr)
+              sys.exit(1)
+
+          print(f"{header}\n{body}\n{footer}")
+          PY
+          )"
+
+          line_count="$(printf '%s\n' "$key" | wc -l | tr -d ' ')"
+          echo "[ai-review] private key normalized, lines=$line_count"
+          {
+            echo 'private-key<<EOF'
+            printf '%s\n' "$key"
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.GH_APP_ID }}
+          private-key: ${{ steps.app-key.outputs.private-key }}
+          owner: ${{ github.repository_owner }}
+          repositories: ${{ github.event.repository.name }}
+
+      - name: Run AI review
+        shell: bash
+        env:
+          REVIEW_BOT_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          set -euo pipefail
+          echo "[ai-review] step started at $(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+
+          if ! command -v python3 >/dev/null 2>&1; then
+            echo "[ai-review] FATAL: python3 not found in PATH, attempting to install..."
+            sudo apt-get update -qq && sudo apt-get install -y -qq python3
+            if ! command -v python3 >/dev/null 2>&1; then
+              echo "[ai-review] FATAL: python3 still not available after install attempt"
+              exit 2
+            fi
+            echo "[ai-review] python3 installed successfully: $(python3 --version)"
+          fi
+
+          echo "[ai-review] invoking python script..."
+          set +e
+          python3 - <<'PY'
+          import json
+          import os
+          import re
+          import sys
+          import traceback
+          import urllib.error
+          import urllib.request
+
+          DEFAULT_REVIEW_PROMPT_TEMPLATE = """作为资深代码审核专家，审核以下Git PR代码变更：
+          {code_diff}
+
+          审核要求：
+          1. 识别代码中的安全漏洞、逻辑错误、边界值处理问题
+          2. 检查代码规范（命名、注释、格式、设计模式等）
+          3. **严格区分「必须修改」和「建议优化」两类，宁可少报也不要误报**
+
+          ## 必须修改的标准（极其严格，仅限以下情况）：
+
+          **安全类（高危）：**
+          - SQL注入漏洞（未使用参数化查询，直接拼接SQL）
+          - 硬编码密钥/密码/token（明文存储敏感凭证）
+          - 权限绕过/越权访问（缺少权限校验）
+          - XSS跨站脚本攻击（未转义用户输入）
+          - 命令注入（直接执行用户输入的命令）
+
+          **前端安全类（高危）：**
+          - dangerouslySetInnerHTML 直接渲染未经消毒的用户输入（React XSS）
+          - 前端代码中硬编码 API Key / Secret / Token（会暴露在客户端打包产物中）
+          - eval()、new Function()、innerHTML 直接执行或渲染用户可控内容
+          - postMessage 未校验 origin 导致跨域消息注入
+
+          **逻辑类（致命错误）：**
+          - 空指针/NPE必现（100%会崩溃的代码）
+          - 死循环/无限递归（必然导致程序挂起）
+          - 资源泄漏（数据库连接/文件句柄未关闭且无finally保护）
+          - 数据丢失风险（删除/覆盖数据前无备份或确认）
+
+          **前端逻辑类（致命错误）：**
+          - useEffect 依赖缺失或错误导致无限渲染循环（setState 在 effect 中无条件触发）
+          - 在渲染路径中直接调用副作用（未包裹在 useEffect/useMemo 中，导致每次渲染都执行）
+
+          ## 建议优化的范围（所有其他问题都归入此类）：
+
+          **安全类（中低风险）：**
+          - 使用HTTP而非HTTPS（可能存在中间人攻击风险，但非直接漏洞）
+          - 域名/IP硬编码（降低灵活性，但不影响安全）
+          - 日志打印敏感信息（可能泄露，但非直接漏洞）
+          - 缺少重试机制（影响可用性，但非安全问题）
+          - 异常处理不完善（可能导致信息泄露，但非直接漏洞）
+          - File.resolveFile 路径遍历（本项目文件路径均由后端规则生成，不接受前端用户注入，归入建议优化）
+
+          **代码质量类：**
+          - 命名问题（变量名/方法名/类名不规范、拼写错误、语义不清）
+          - 命名不规范、注释缺失
+          - 代码重复、可读性差
+          - 性能优化建议（非性能瓶颈）
+          - 设计模式建议
+          - 边界值校验建议（非必现崩溃）
+
+          **前端代码质量类：**
+          - useEffect 依赖数组不完整或多余（可能导致过期闭包或多余执行，但非必现崩溃）
+          - 列表渲染缺少稳定 key（使用 index 作为 key 导致渲染异常风险）
+          - TypeScript 滥用 any 类型（削弱类型安全，但非运行时错误）
+          - 直接修改 state（未通过 setState/immutable 方式，可能导致 UI 不更新）
+          - 组件过度渲染（缺少 React.memo / useMemo / useCallback，影响性能但功能正常）
+          - 打包体积问题（未做 code-splitting、引入整个库而非按需导入）
+          - 前端表单缺少客户端校验（用户体验问题，服务端已有校验兜底）
+          - CSS/样式问题（未使用设计系统 Token、硬编码颜色/间距）
+          - 无障碍可访问性（a11y）问题（缺少 aria 属性、alt 文本、键盘导航支持）
+
+          **重要原则：**
+          1. 如果问题不会导致「数据泄露/丢失」或「程序必然崩溃」，归入建议优化
+          2. 如果问题需要「特定条件触发」或「概率性发生」，归入建议优化
+          3. 如果问题是「最佳实践」或「代码规范」，归入建议优化
+          4. 宁可把问题归入建议优化，也不要误报为必须修改
+          5. 如果你不确定是否属于必须修改，那就归入建议优化
+          6. 如果发现必须修改，请重复确认问题，是否是你误判
+          7. 业务逻辑代码列入建议优化
+
+          **请严格按以下格式输出：**
+
+          ## 必须修改
+          - [问题类型] 具体描述（包含代码位置） | 修复建议
+
+          ## 建议优化
+          - [问题类型] 具体描述（包含代码位置） | 优化建议
+
+          注意：如果某个章节没有内容，请写"无"。
+          """
+
+          def log(msg: str):
+              print(f"[ai-review] {msg}", flush=True)
+
+          def getenv(name: str, default: str = "") -> str:
+              return os.getenv(name, default).strip()
+
+          def read_event() -> dict:
+              event_path = getenv("GITHUB_EVENT_PATH")
+              if not event_path:
+                  raise RuntimeError("missing GITHUB_EVENT_PATH")
+              with open(event_path, "r", encoding="utf-8") as handle:
+                  return json.load(handle)
+
+          def request(url: str, method: str = "GET", headers=None, body=None, timeout: int = 60):
+              request_headers = dict(headers or {})
+              payload = None
+              if body is not None:
+                  payload = json.dumps(body).encode("utf-8")
+                  request_headers.setdefault("Content-Type", "application/json")
+              req = urllib.request.Request(url, data=payload, headers=request_headers, method=method)
+              try:
+                  with urllib.request.urlopen(req, timeout=timeout) as response:
+                      raw = response.read()
+                      content_type = response.headers.get("Content-Type", "")
+                      charset = response.headers.get_content_charset() or "utf-8"
+                      text = raw.decode(charset, errors="replace")
+                      if "json" in content_type:
+                          return json.loads(text)
+                      return text
+              except urllib.error.HTTPError as exc:
+                  error_body = ""
+                  try:
+                      error_body = exc.read().decode("utf-8", errors="replace")[:2000]
+                  except Exception:
+                      pass
+                  raise RuntimeError(
+                      f"HTTP {exc.code} {exc.reason} for {method} {url}\nResponse: {error_body}"
+                  ) from exc
+              except urllib.error.URLError as exc:
+                  raise RuntimeError(f"URL error for {method} {url}: {exc.reason}") from exc
+
+          def request_json(url: str, method: str = "GET", headers=None, body=None, timeout: int = 60):
+              result = request(url, method=method, headers=headers, body=body, timeout=timeout)
+              if isinstance(result, dict):
+                  return result
+              if isinstance(result, list):
+                  return result
+              raise RuntimeError(f"expected JSON object/array from {url}, got: {str(result)[:500]}")
+
+          def request_text(url: str, headers=None, timeout: int = 60) -> str:
+              response = request(url, method="GET", headers=headers, timeout=timeout)
+              if isinstance(response, str):
+                  return response
+              raise RuntimeError(f"expected text response from {url}")
+
+          def github_headers(token: str, accept: str = "application/vnd.github+json") -> dict:
+              return {
+                  "Authorization": f"Bearer {token}",
+                  "Accept": accept,
+                  "X-GitHub-Api-Version": "2022-11-28",
+                  "User-Agent": "jobclaw-ai-review",
+              }
+
+          def fetch_pull_request_diff(repo: str, pr_number: int, token: str) -> str:
+              diff_url = f"https://api.github.com/repos/{repo}/pulls/{pr_number}"
+              try:
+                  diff_text = request_text(diff_url, headers=github_headers(token, "application/vnd.github.v3.diff"), timeout=60)
+                  if diff_text.strip():
+                      return diff_text
+              except Exception as exc:
+                  log(f"diff endpoint failed, fallback to files API: {exc}")
+
+              files = []
+              page = 1
+              while True:
+                  files_url = f"https://api.github.com/repos/{repo}/pulls/{pr_number}/files?per_page=100&page={page}"
+                  page_items = request_json(files_url, headers=github_headers(token), timeout=60)
+                  if not page_items:
+                      break
+                  files.extend(page_items)
+                  if len(page_items) < 100:
+                      break
+                  page += 1
+
+              if not files:
+                  return ""
+
+              chunks = []
+              for item in files:
+                  filename = item.get("filename", "unknown")
+                  status = item.get("status", "unknown")
+                  additions = item.get("additions", 0)
+                  deletions = item.get("deletions", 0)
+                  patch = item.get("patch")
+                  chunks.append(f"### {filename}\nstatus: {status}, additions: {additions}, deletions: {deletions}\n")
+                  if patch:
+                      chunks.append(patch)
+                  else:
+                      chunks.append("[patch omitted by GitHub API]\n")
+              return "\n".join(chunks)
+
+          def call_llm(api_url: str, api_key: str, model: str, prompt_text: str) -> str:
+              log(f"calling LLM: model={model}, prompt_len={len(prompt_text)}")
+              payload = {
+                  "model": model,
+                  "messages": [
+                      {
+                          "role": "system",
+                          "content": "你是一位资深的代码审核专家，专注于发现代码中的问题并提供专业建议。先分步写出你的思考过程（用...标识思考），再给出最终结论，不要跳过任何推理步骤，中文返回。",
+                      },
+                      {
+                          "role": "user",
+                          "content": prompt_text,
+                      },
+                  ],
+                  "stream": False,
+              }
+              headers = {
+                  "Authorization": f"Bearer {api_key}",
+                  "Content-Type": "application/json",
+                  "Accept": "application/json",
+                  "User-Agent": "jobclaw-ai-review",
+              }
+              response = request_json(api_url, method="POST", headers=headers, body=payload, timeout=180)
+              choices = response.get("choices", [])
+              if not choices:
+                  raise RuntimeError(f"LLM response has no choices: {json.dumps(response)[:1000]}")
+              message = choices[0].get("message", {})
+              # AIDEV-NOTE: some models (e.g. deepseek-reasoner) put the answer in reasoning_content or thinking
+              for field in ("reasoning_content", "thinking"):
+                  reasoning = (message.get(field) or "").strip()
+                  if reasoning:
+                      log(f"💭 模型推理过程（前500字符）：\n{reasoning[:500]}...\n")
+              content = (message.get("content") or "").strip()
+              if not content:
+                  reasoning = (message.get("reasoning_content") or "").strip()
+                  if reasoning:
+                      log("⚠️ 模型 content 为空，使用 reasoning_content 作为兜底")
+                      content = reasoning
+              if not content:
+                  raise RuntimeError(f"LLM returned empty content. Full message keys: {list(message.keys())}")
+              return content
+
+          def is_must_fix(content: str) -> bool:
+              if not content:
+                  return False
+
+              # AIDEV-NOTE: support both Chinese and English section headers
+              match = re.search(r"##\s*(?:必须修改|Must Fix)\s*\n(.*?)(?=\n##\s*|$)", content, re.DOTALL | re.IGNORECASE)
+              if not match:
+                  log("⚠️ 未找到「## 必须修改」章节，默认通过")
+                  return False
+
+              section = match.group(1).strip()
+              if not section or section.lower() in {"none", "- none"} or section == "无":
+                  log("✅ 「## 必须修改」章节为空或标记为「无」")
+                  return False
+
+              for line in section.splitlines():
+                  line = line.strip()
+                  if not line or line == "无":
+                      continue
+                  if (line.startswith("*") or line.startswith("-")):
+                      lc = line[1:].strip()
+                      if lc.lower() in {"none", '无'}:
+                        continue
+                  if line.startswith("-") and "none" not in line.lower():
+                      log(f"⚠️ 检测到必须修改的问题：{line[:100]}...")
+                      return True
+              return False
+
+          def clamp_text(text: str, max_chars: int) -> str:
+              if len(text) <= max_chars:
+                  return text
+              return text[:max_chars] + "\n\n[truncated because the diff is too large]"
+
+          def post_review(repo: str, pr_number: int, token: str, body: str, event: str):
+              url = f"https://api.github.com/repos/{repo}/pulls/{pr_number}/reviews"
+              payload = {"body": body, "event": event}
+              return request_json(url, method="POST", headers=github_headers(token), body=payload, timeout=30)
+
+          def post_comment(repo: str, pr_number: int, token: str, body: str):
+              url = f"https://api.github.com/repos/{repo}/issues/{pr_number}/comments"
+              payload = {"body": body}
+              return request_json(url, method="POST", headers=github_headers(token), body=payload, timeout=30)
+
+          # ── main ──────────────────────────────────────────────
+          try:
+              log("starting AI code review...")
+
+              event = read_event()
+              pull_request = event.get("pull_request", {})
+              repo = getenv("GITHUB_REPOSITORY")
+              pr_number = pull_request.get("number")
+              target_branch = pull_request.get("base", {}).get("ref", "")
+              pr_html_url = pull_request.get("html_url", "")
+
+              if not repo or not pr_number:
+                  log("missing pull request context, skip review")
+                  sys.exit(0)
+
+              if target_branch not in {"main", "v2"}:
+                  log(f"target branch '{target_branch}' is out of scope, skip review")
+                  sys.exit(0)
+
+              log(f"reviewing PR #{pr_number} -> {target_branch} in {repo}")
+
+              review_bot_token = getenv("REVIEW_BOT_TOKEN")
+              api_key = getenv("MR_OPENAI_API_KEY")
+              api_url = getenv("MR_OPENAI_API_URL")
+
+              if not review_bot_token:
+                  log("missing REVIEW_BOT_TOKEN from create-github-app-token action, skip review")
+                  sys.exit(0)
+
+              if not api_key or not api_url:
+                  missing = [n for n, v in [("MR_OPENAI_API_KEY", api_key), ("MR_OPENAI_API_URL", api_url)] if not v]
+                  log(f"missing model credentials: {', '.join(missing)}, skip review")
+                  sys.exit(0)
+
+              log("fetching PR diff...")
+              diff_content = fetch_pull_request_diff(repo, pr_number, review_bot_token)
+              if not diff_content.strip():
+                  log("PR diff is empty, skip review")
+                  sys.exit(0)
+
+              max_diff_chars_raw = getenv("MAX_DIFF_CHARS", "40000")
+              try:
+                  max_diff_chars = int(max_diff_chars_raw)
+              except ValueError:
+                  max_diff_chars = 40000
+
+              diff_content = clamp_text(diff_content, max_diff_chars)
+              log(f"diff length: {len(diff_content)} chars (max {max_diff_chars})")
+
+              review_prompt_template = getenv("AI_REVIEW_PROMPT") or DEFAULT_REVIEW_PROMPT_TEMPLATE
+              prompt_text = review_prompt_template.replace("{code_diff}", diff_content)
+              model = getenv("AI_REVIEW_MODEL") or "deepseek-reasoner"
+
+              log("calling model for code review...")
+              review_result = call_llm(api_url, api_key, model, prompt_text)
+              log(f"model returned {len(review_result)} chars")
+
+              must_fix = is_must_fix(review_result)
+              review_event = "REQUEST_CHANGES" if must_fix else "COMMENT"
+              status_emoji = "❌" if must_fix else "✅"
+              status_text = "审核失败" if must_fix else "审核通过"
+              review_body = f"""### 🤖 AI 代码审核结论 {status_emoji} {status_text}
+
+          {review_result}
+
+          ---
+          *本评论由 GitHub Actions CI 自动生成，基于 GitHub App 鉴权 + `{model}` 模型审核*
+          *PR: {pr_html_url}*
+          """
+
+              try:
+                  post_review(repo, pr_number, review_bot_token, review_body, review_event)
+                  log(f"pull request review submitted: {review_event}")
+              except Exception as exc:
+                  log(f"review submission failed, fallback to issue comment: {exc}")
+                  post_comment(repo, pr_number, review_bot_token, review_body)
+
+              if must_fix:
+                  log("must-fix issues detected, fail the job to block merge")
+                  sys.exit(1)
+
+              log("no must-fix issues found, review passed")
+              sys.exit(0)
+
+          except SystemExit:
+              raise
+          except Exception:
+              log("FATAL: unhandled exception in AI code review")
+              traceback.print_exc()
+              sys.exit(2)
+          PY
+          PY_EXIT=$?
+          set -e
+          echo "[ai-review] python script exited with code: $PY_EXIT at $(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+          exit $PY_EXIT

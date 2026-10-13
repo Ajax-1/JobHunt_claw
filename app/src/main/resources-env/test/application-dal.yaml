@@ -1,0 +1,18 @@
+spring:
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.xml
+    enabled: ${DATABASE_LIQUIBASE_ENABLED:true} # 当实际使用的数据库不支持 liquibase 时，将这个参数设置为 false
+  datasource:
+    url: jdbc:mysql://${DATABASE_HOST:localhost}:${DATABASE_PORT:3306}/${jobclaw.database.name}?createDatabaseIfNotExist=true&useUnicode=true&allowPublicKeyRetrieval=true&autoReconnect=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=Asia/Shanghai
+    username: ${DATABASE_USERNAME:root}
+    password: ${DATABASE_PASSWORD:}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  # jpa配置
+  jpa:
+    hibernate:
+      # 不做任何操作，完全关闭自动DDL
+      ddl-auto: none
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
+    show-sql: true

@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <property name="now" value="now()" dbms="mysql"/>
+    <property name="autoIncrement" value="true"/>
+
+    <changeSet id="250722_00000001" author="YiHui">
+        <sqlFile dbms="mysql" endDelimiter=";" encoding="UTF-8" path="db/changelog/init_schema_250722.sql"/>
+    </changeSet>
+
+    <changeSet id="250722_00000002" author="YiHui">
+        <validCheckSum>9:a3c7fd45e22274d40b59a8039a7fe56e</validCheckSum>
+        <validCheckSum>9:13b01e108a96688f360119e7c32ee16f</validCheckSum>
+        <sqlFile dbms="mysql" endDelimiter=";" encoding="UTF-8" path="db/changelog/init_data_250722.sql"/>
+    </changeSet>
+
+    <!-- 添加公司所属行业 -->
+    <changeSet id="250815_00000001" author="YiHui">
+        <sqlFile dbms="mysql" endDelimiter=";" encoding="UTF-8" path="db/changelog/update_schema_250815.sql"/>
+    </changeSet>
+
+    <changeSet id="250820_00000001" author="YiHui">
+        <sqlFile dbms="mysql" endDelimiter=";" encoding="UTF-8" path="db/changelog/update_schema_250820.sql"/>
+    </changeSet>
+
+    <!-- 用户订阅偏好 -->
+    <changeSet id="250822_00000001" author="YiHui">
+        <sqlFile dbms="mysql" endDelimiter=";" encoding="UTF-8" path="db/changelog/update_schema_250822.sql"/>
+    </changeSet>
+
+    <!--   添加阿里百炼模型 -->
+    <changeSet id="250825_00000001" author="YiHui">
+        <sqlFile dbms="mysql" endDelimiter=";" encoding="UTF-8" path="db/changelog/update_data_250825.sql"/>
+    </changeSet>
+
+    <!--    新增自定义的McpClient会话上下文持久表 -->
+    <changeSet id="251014_00000001" author="YiHui">
+        <sqlFile dbms="mysql" endDelimiter=";" encoding="UTF-8" path="db/changelog/update_schema_251014.sql"/>
+    </changeSet>
+
+    <!-- 全局环境配置表 -->
+    <changeSet id="260409_00000001" author="YiHui">
+        <sqlFile dbms="mysql" endDelimiter=";" encoding="UTF-8" path="db/changelog/global_env_config_260409.sql"/>
+    </changeSet>
+
+    <!-- 修复checksum错误 -->
+    <changeSet id="260615_00000001" author="Codex">
+        <sqlFile dbms="mysql" endDelimiter=";" encoding="UTF-8" path="db/changelog/llm_monitor_260615.sql"/>
+    </changeSet>
+
+    <!-- 用户钉钉渠道绑定字段 -->
+    <changeSet id="260618_00000001" author="Codex">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="user_info" columnName="ding_ding_user_id"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="user_info">
+            <column name="ding_ding_user_id" type="varchar(128)" defaultValue="" remarks="钉钉用户ID">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <!-- 用户飞书渠道绑定字段 -->
+    <changeSet id="260618_00000002" author="Codex">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="user_info" columnName="fei_shu_user_id"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="user_info">
+            <column name="fei_shu_user_id" type="varchar(128)" defaultValue="" remarks="飞书用户ID">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <!-- 内置大模型供应商配置元数据 -->
+    <changeSet id="260618_00000003" author="Codex" runOnChange="true">
+        <sqlFile dbms="mysql" endDelimiter=";" encoding="UTF-8" path="db/changelog/llm_provider_config_260618.sql"/>
+    </changeSet>
+
+    <!-- 放宽采集任务结果字段长度 -->
+    <changeSet id="260627_00000001" author="Codex">
+        <sqlFile dbms="mysql" endDelimiter=";" encoding="UTF-8" path="db/changelog/update_schema_260627.sql"/>
+    </changeSet>
+
+    <!-- 补齐草稿表的岗位补充信息字段 -->
+    <changeSet id="260627_00000002" author="Codex">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="draft_oc" columnName="salary"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="draft_oc">
+            <column name="salary" type="varchar(128)" defaultValue="" remarks="薪资范围">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="260627_00000003" author="Codex">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="draft_oc" columnName="education"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="draft_oc">
+            <column name="education" type="varchar(128)" defaultValue="" remarks="学历要求">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="260627_00000004" author="Codex">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="draft_oc" columnName="experience"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="draft_oc">
+            <column name="experience" type="varchar(128)" defaultValue="" remarks="工作经验要求">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <!-- 采集源管理表 -->
+    <changeSet id="260627_00000005" author="Codex">
+        <sqlFile dbms="mysql" endDelimiter=";" encoding="UTF-8" path="db/changelog/gather_source_260627.sql"/>
+    </changeSet>
+
+    <!-- 采集任务关联采集源 -->
+    <changeSet id="260627_00000006" author="Codex">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="gather_task" columnName="source_id"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="gather_task">
+            <column name="source_id" type="bigint" remarks="采集源ID"/>
+            <column name="source_version" type="int" defaultValueNumeric="1" remarks="采集源版本"/>
+            <column name="runner_type" type="varchar(32)" defaultValue="admin" remarks="执行来源：admin/agent/system">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <createIndex tableName="gather_task" indexName="idx_gather_task_source">
+            <column name="source_id"/>
+        </createIndex>
+        <createIndex tableName="gather_task" indexName="idx_gather_task_runner">
+            <column name="runner_type"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- 草稿关联采集源和产出任务 -->
+    <changeSet id="260627_00000007" author="Codex">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="draft_oc" columnName="source_id"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="draft_oc">
+            <column name="source_id" type="bigint" remarks="采集源ID"/>
+            <column name="source_task_id" type="bigint" remarks="产出草稿的采集任务ID"/>
+            <column name="runner_type" type="varchar(32)" defaultValue="" remarks="执行来源：admin/agent/system">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <createIndex tableName="draft_oc" indexName="idx_draft_oc_source">
+            <column name="source_id"/>
+        </createIndex>
+        <createIndex tableName="draft_oc" indexName="idx_draft_oc_source_task">
+            <column name="source_task_id"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- 职位库保留采集源链路 -->
+    <changeSet id="260627_00000008" author="Codex">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="oc_info" columnName="source_id"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="oc_info">
+            <column name="source_id" type="bigint" remarks="采集源ID"/>
+            <column name="source_task_id" type="bigint" remarks="产出来源任务ID"/>
+            <column name="runner_type" type="varchar(32)" defaultValue="" remarks="执行来源：admin/agent/system">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <createIndex tableName="oc_info" indexName="idx_oc_info_source">
+            <column name="source_id"/>
+        </createIndex>
+        <createIndex tableName="oc_info" indexName="idx_oc_info_runner">
+            <column name="runner_type"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- 智谱供应商下线：清理采集模型字典项并迁移存量采集任务/采集源 -->
+    <changeSet id="260911_00000001" author="Codex">
+        <sqlFile dbms="mysql" endDelimiter=";" encoding="UTF-8" path="db/changelog/update_data_260911_drop_zhipu.sql"/>
+    </changeSet>
+
+    <!-- 智谱供应商下线：迁移用户级模型偏好（表由 Hibernate 维护，MySQL 可能缺失） -->
+    <changeSet id="260911_00000002" author="Codex">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="ai_user_preference"/>
+        </preConditions>
+        <sqlFile dbms="mysql" endDelimiter=";" encoding="UTF-8" path="db/changelog/update_data_260911_user_preference.sql"/>
+    </changeSet>
+    <!-- AI-GENERATED AIDEV-NOTE: MySQL 关闭自动建表，显式维护用户模型偏好。 -->
+    <changeSet id="260917_00000001" author="Codex">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="ai_user_preference"/></not>
+        </preConditions>
+        <createTable tableName="ai_user_preference">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="bigint">
+                <constraints unique="true" uniqueConstraintName="uk_ai_user_preference_user"/>
+            </column>
+            <column name="preference" type="longtext"/>
+            <column name="create_time" type="datetime(6)"/>
+            <column name="update_time" type="datetime(6)"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="260917_00000002" author="Codex">
+        <sqlFile dbms="mysql" endDelimiter=";" encoding="UTF-8" path="db/changelog/update_data_260917_multimodal.sql"/>
+    </changeSet>
+</databaseChangeLog>

@@ -1,0 +1,2 @@
+org.springframework.context.ApplicationContextInitializer=\
+com.git.hui.jobclaw.components.env.DotenvEnvironmentProcessor

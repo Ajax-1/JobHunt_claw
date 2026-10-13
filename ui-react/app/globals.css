@@ -1,0 +1,81 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 220 25% 98%;
+    --foreground: 222 35% 14%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222.2 84% 4.9%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 222.2 84% 4.9%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
+    --radius: 0.75rem;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 221.2 83.2% 53.3%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  }
+}
+
+/* AI-GENERATED AIDEV-NOTE: 全站共用的视觉语义，状态颜色仅用于反馈。 */
+@layer components {
+  .eyebrow { @apply flex items-center gap-2 text-xs font-semibold tracking-widest text-slate-500; }
+  .soft-tag { @apply inline-flex items-center rounded-md bg-slate-100 px-2 py-1 text-[11px] font-medium text-slate-600; }
+  .empty-panel { @apply rounded-2xl border border-dashed border-slate-200 bg-white px-6 py-16 text-center text-slate-500; }
+  .admin-workspace { @apply bg-[#f7f8fa]; }
+  .admin-workspace table thead { @apply bg-slate-50/80; }
+  .admin-workspace table th { @apply text-xs font-medium text-slate-500; }
+  .admin-workspace table td { @apply text-[13px]; }
+  .admin-workspace table tr { @apply border-slate-100; }
+  .admin-workspace table td button { @apply shadow-none; }
+  .admin-workspace table td button.bg-red-500 { @apply bg-transparent text-slate-400 hover:bg-red-50 hover:text-red-600; }
+  .admin-workspace table td button.bg-red-600 { @apply bg-transparent text-slate-400 hover:bg-red-50 hover:text-red-600; }
+  .admin-workspace .shadow { @apply shadow-sm; }
+  .admin-workspace input, .admin-workspace [role="combobox"] { @apply bg-white; }
+  .member-workspace { @apply mx-auto max-w-7xl px-4 sm:px-8; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}

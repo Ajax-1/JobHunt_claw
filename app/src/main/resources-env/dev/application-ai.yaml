@@ -1,0 +1,44 @@
+spring:
+  ai:
+    spark:
+      # https://console.xfyun.cn/services/cbm
+      # api-key 使用你自己申请的进行替换；如果为了安全考虑，可以通过启动参数进行设置
+      base-url: https://spark-api-open.xf-yun.com/v1/chat/completions
+      api-key: ${spark-api-key}
+      # 这里存储的是基于OpenAI-Starter的大模型交互的配置
+      openai-client: true # ture 表示使用OpenAI的client来实现讯飞大模型交互； false 则表示使用自定义的 client 实现讯飞大模型交互
+      openai-base-url: https://spark-api-open.xf-yun.com
+      chat:
+        options:
+          model: lite
+    openai:
+      # openai chatgpt 大模型
+      api-key: ${openai-api-key}
+    dashscope:
+      # 阿里的百炼大模型
+      # https://bailian.console.aliyun.com/tab=model#/api-key
+      api-key: ${dashscope-api-key}
+      # 多模态的图片推理模型
+      multi-model: qwen3.5-omni-flash
+      chat:
+        options:
+          model: qwen3.7-plus
+    mcp:
+      client:
+        #  使用本地的mcp server，通过进程通信，我们这里演示的是使用 selenium 来实现网页数据抓取
+        stdio:
+          servers-configuration: ${MCP_SERVERS_CONFIG:classpath:mcp-servers.json}
+        # 如果想要体验 MCP Server，请将下面的 false 改成 true
+        enabled: ${AGENT_MCP_CLIENT_ENABLED:false}
+        name: JobClaw MCP
+        version: 1.0.0
+        request-timeout: 30s
+        # 注意，这里使用的是异步，因此代码中获取的也应该是异步的 McpAsyncClient
+        type: async
+
+
+logging:
+  level:
+    org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor: info
+    com.git.hui.jobclaw.gather.service.GatherAiAgent: debug  # 开发时，输出debug调试日志，用于显示与大模型交互的输入/返回
+    com.git.hui.jobclaw.agents.impl.BaseAgent: debug # 开发时，输出agent执行的日志
