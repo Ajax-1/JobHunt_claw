@@ -14,6 +14,7 @@ import { useLoginModal } from "@/hooks/useLoginModal"
 import { RecruitmentHero } from "./RecruitmentHero"
 import { OPEN_JOB_ASSISTANT_EVENT } from "@/lib/chat-events"
 import { useLoginUser } from "@/hooks/useLoginUser"
+import { SaveApplicationButton } from "./SaveApplicationButton"
 
 interface Recruitment {
   id: number
@@ -100,7 +101,7 @@ export function JobBoard({ internship = false }: JobBoardProps) {
             <p className="mt-2.5 line-clamp-2 text-sm leading-6 text-slate-600" title={job.position}>{job.position || "岗位信息待补充"}</p>
             <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-slate-500"><span className="inline-flex max-w-full items-center gap-1.5"><MapPin className="h-3.5 w-3.5 shrink-0" /><span className="truncate">{job.jobLocation || "地点待补充"}</span></span><span>{job.recruitmentTarget || "招聘对象待补充"}</span><span>{dateLabel(job.lastUpdatedTime)} 更新</span></div>
           </div>
-          <div className="flex shrink-0 items-center justify-between gap-4 sm:flex-col sm:items-end sm:justify-center"><span className="text-xs text-slate-500">{job.deadline || "截止时间待确认"}</span>{locked ? <Button variant="outline" size="sm" onClick={openMembership}>解锁详情<LockKeyhole /></Button> : <Button asChild variant="outline" size="sm"><Link href={`/job?id=${job.id}`}>查看招聘<ArrowUpRight /></Link></Button>}</div>
+          <div className="flex shrink-0 items-center justify-between gap-4 sm:flex-col sm:items-end sm:justify-center"><span className="text-xs text-slate-500">{job.deadline || "截止时间待确认"}</span>{locked ? <Button variant="outline" size="sm" onClick={openMembership}>解锁详情<LockKeyhole /></Button> : <div className="flex items-center gap-2"><Button asChild variant="outline" size="sm"><Link href={`/job?id=${job.id}`}>查看招聘<ArrowUpRight /></Link></Button><SaveApplicationButton jobId={job.id} compact /></div>}</div>
         </article>)}</div> : <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white"><table className="w-full min-w-[780px] text-left text-sm"><thead className="bg-slate-50 text-xs text-slate-500"><tr>{["公司 / 招聘类型", "岗位摘要", "工作地点", "招聘对象", "更新时间", ""].map((label,i) => <th key={i} className="px-5 py-4 font-medium">{label}</th>)}</tr></thead><tbody>{rows.map(job => <tr key={job.id} className="border-t border-slate-100"><td className="px-5 py-4"><p className="font-semibold">{job.companyName}</p><p className="mt-1 text-xs text-slate-500">{job.recruitmentType}</p></td><td className="max-w-xs px-5 py-4"><p className="line-clamp-2 leading-6" title={job.position}>{job.position}</p></td><td className="max-w-40 px-5 py-4"><p className="line-clamp-2">{job.jobLocation}</p></td><td className="whitespace-nowrap px-5 py-4">{job.recruitmentTarget}</td><td className="whitespace-nowrap px-5 py-4 text-xs text-slate-500">{dateLabel(job.lastUpdatedTime)}</td><td className="px-5 py-4">{locked ? <Button variant="ghost" onClick={openMembership}>解锁</Button> : <Link href={`/job?id=${job.id}`} className="whitespace-nowrap text-blue-600">详情 ↗</Link>}</td></tr>)}</tbody></table></div>}
       </>}
       {!error && !loading && total > 0 && <div className="mt-6"><TablePagination page={page} pageSize={size} total={total} currentCount={rows.length} totalLabel="条招聘" onPageChange={setPage} onPageSizeChange={value => { setSize(value); setPage(1) }} /></div>}

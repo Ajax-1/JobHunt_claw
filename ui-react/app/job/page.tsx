@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { externalUrl } from "@/lib/links"
 import { jobDetail } from "@/lib/api"
+import { SaveApplicationButton } from "@/components/jobs/SaveApplicationButton"
 
 interface JobDetail {
     id: number
@@ -94,7 +95,7 @@ export default function JobDetailPage() {
             <section className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-9">
                 <div className="eyebrow">招聘详情</div>
                 <div className="mt-4 flex flex-col justify-between gap-6 sm:flex-row sm:items-center"><div><h1 className="text-3xl font-semibold tracking-tight text-slate-950">{job.companyName}</h1><div className="mt-4 flex flex-wrap gap-2">{[job.companyType, job.recruitmentType, job.recruitmentTarget].filter(Boolean).map((value,i) => <span className="soft-tag" key={i}>{value}</span>)}</div></div>
-                {applyUrl ? <Button asChild size="lg"><a href={applyUrl} target="_blank" rel="noopener noreferrer">前往投递<ExternalLink /></a></Button> : <Button size="lg" disabled>投递链接待补充</Button>}</div>
+                <div className="flex flex-wrap gap-2">{applyUrl ? <Button asChild size="lg"><a href={applyUrl} target="_blank" rel="noopener noreferrer">前往投递<ExternalLink /></a></Button> : <Button size="lg" disabled>投递链接待补充</Button>}<SaveApplicationButton jobId={job.id} /></div></div>
                 <div className="mt-7 flex flex-wrap gap-x-7 gap-y-3 border-t border-slate-100 pt-5 text-sm text-slate-500"><span className="inline-flex items-start gap-2"><MapPin className="h-4 w-4 shrink-0" />{job.jobLocation || "地点待补充"}</span><span className="inline-flex items-center gap-2"><Calendar className="h-4 w-4" />{job.lastUpdatedTime || "日期待补充"} 更新</span></div>
             </section>
             <div className="mt-6 grid items-start gap-6 lg:grid-cols-[1fr_300px]">

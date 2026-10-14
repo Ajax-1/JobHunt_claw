@@ -323,6 +323,16 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   >
                     内推广场
                   </a>
+                  <a
+                    href="/applications"
+                    className={`${
+                      pathname === "/applications"
+                        ? "text-blue-600 font-medium"
+                        : "text-gray-700"
+                    } hover:text-blue-600`}
+                  >
+                    我的求职
+                  </a>
                 </nav>
               )}
             </div>

@@ -232,4 +232,34 @@
     <changeSet id="260917_00000002" author="Codex">
         <sqlFile dbms="mysql" endDelimiter=";" encoding="UTF-8" path="db/changelog/update_data_260917_multimodal.sql"/>
     </changeSet>
+
+    <!-- 用户个人求职跟踪记录，与公共职位库状态隔离 -->
+    <changeSet id="261014_00000001" author="Codex">
+        <preConditions onFail="MARK_RAN">
+            <not><tableExists tableName="job_application"/></not>
+        </preConditions>
+        <createTable tableName="job_application">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="user_id" type="bigint"><constraints nullable="false"/></column>
+            <column name="job_id" type="bigint"><constraints nullable="false"/></column>
+            <column name="company_name" type="varchar(512)" defaultValue=""><constraints nullable="false"/></column>
+            <column name="position" type="text"><constraints nullable="false"/></column>
+            <column name="job_location" type="text"><constraints nullable="false"/></column>
+            <column name="related_link" type="text"><constraints nullable="false"/></column>
+            <column name="job_announcement" type="text"><constraints nullable="false"/></column>
+            <column name="deadline" type="varchar(512)" defaultValue=""><constraints nullable="false"/></column>
+            <column name="status" type="varchar(20)" defaultValue="SAVED"><constraints nullable="false"/></column>
+            <column name="notes" type="varchar(4000)" defaultValue=""><constraints nullable="false"/></column>
+            <column name="next_follow_up_date" type="date"/>
+            <column name="create_time" type="datetime(6)"><constraints nullable="false"/></column>
+            <column name="update_time" type="datetime(6)"><constraints nullable="false"/></column>
+        </createTable>
+        <addUniqueConstraint tableName="job_application" columnNames="user_id,job_id" constraintName="uk_job_application_user_job"/>
+        <createIndex tableName="job_application" indexName="idx_job_application_user_status">
+            <column name="user_id"/>
+            <column name="status"/>
+        </createIndex>
+    </changeSet>
 </databaseChangeLog>

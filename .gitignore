@@ -87,3 +87,5 @@ app/src/main/resources/application-private.yml
 **/mem.md
 /workspace/skills/
 /workspace/
+/.pnpm-store/
+!/README.md

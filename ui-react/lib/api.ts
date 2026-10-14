@@ -201,6 +201,45 @@ export async function jobDetail(id: number) {
   throw new Error(res.data?.msg || "获取岗位信息失败");
 }
 
+export type ApplicationStatus = "SAVED" | "APPLIED" | "INTERVIEW" | "OFFER" | "REJECTED" | "WITHDRAWN";
+export interface JobApplication {
+  id: number;
+  jobId: number;
+  companyName: string;
+  position: string;
+  jobLocation?: string;
+  relatedLink?: string;
+  jobAnnouncement?: string;
+  deadline?: string;
+  status: ApplicationStatus;
+  notes?: string;
+  nextFollowUpDate?: string | null;
+  createTime?: string | number;
+  updateTime?: string | number;
+}
+export interface ApplicationPage { list: JobApplication[]; page: number; size: number; total: number; hasMore?: boolean }
+
+function unwrapApplication<T>(response: { data?: { code?: number; data?: T; msg?: string } }, fallback: string): T {
+  if (response.data?.code === 0 && response.data.data !== undefined) return response.data.data;
+  throw new Error(response.data?.msg || fallback);
+}
+export async function fetchApplications(params?: { status?: ApplicationStatus; page?: number; size?: number }): Promise<ApplicationPage> {
+  const response = await api.get("/api/user/applications", { params });
+  return unwrapApplication(response, "获取求职进度失败");
+}
+export async function saveApplication(jobId: number): Promise<JobApplication> {
+  const response = await api.post("/api/user/applications", { jobId });
+  return unwrapApplication(response, "保存岗位失败");
+}
+export async function updateApplication(id: number, payload: { status: ApplicationStatus; notes?: string; nextFollowUpDate?: string | null }): Promise<JobApplication> {
+  const response = await api.patch(`/api/user/applications/${id}`, payload);
+  return unwrapApplication(response, "更新求职进度失败");
+}
+export async function deleteApplication(id: number): Promise<void> {
+  const response = await api.delete(`/api/user/applications/${id}`);
+  unwrapApplication(response, "删除记录失败");
+}
+
 export async function fetchAdminJobList(
   params?: JobListQuery
 ): Promise<JobListResponse> {
