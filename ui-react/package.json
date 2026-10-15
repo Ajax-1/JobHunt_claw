@@ -2,6 +2,7 @@
   "name": "jobclaw-web",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "pnpm@11.25.0",
   "scripts": {
     "build": "node scripts/build-static.mjs",
     "dev": "next dev",

@@ -8,6 +8,7 @@ import com.git.hui.jobclaw.core.channel.ChannelConfig;
 import com.git.hui.jobclaw.core.configuration.ConfigurationManager;
 import com.git.hui.jobclaw.core.utils.SensitiveUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -27,6 +28,7 @@ import java.util.Map;
 @Permission(role = UserRoleEnum.NORMAL)
 @RestController
 @RequestMapping("/api/feishu")
+@ConditionalOnProperty(name = "agent.channels.feishu.enabled", havingValue = "true", matchIfMissing = true)
 public class FeiShuBotBinder implements ChannelBinder {
     private final FeiShuBotProperties feiShuBotProperties;
     private final FeiShuBotChannel feiShuBotChannel;

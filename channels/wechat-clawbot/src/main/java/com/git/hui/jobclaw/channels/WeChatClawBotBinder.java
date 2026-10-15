@@ -12,6 +12,7 @@ import com.git.hui.jobclaw.core.configuration.ConfigurationManager;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,6 +33,7 @@ import java.util.Map;
 @Permission(role = UserRoleEnum.NORMAL)
 @RestController
 @RequestMapping("/api/wechat/clawbot")
+@ConditionalOnProperty(name = "agent.channels.wechat.clawbot.enabled", havingValue = "true", matchIfMissing = true)
 public class WeChatClawBotBinder implements ChannelBinder {
     private static final String WX_CLAW_BOT_PREFIX = "agent.channels.wechat.clawbot";
     private static final String WX_CLAW_BOT_ACCOUNT_PREFIX = WX_CLAW_BOT_PREFIX + ".accounts";

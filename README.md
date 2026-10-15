@@ -15,7 +15,26 @@ JobClaw 是一款面向校招和实习的求职信息管理应用。它把分散
 
 ## 本地运行
 
-需要 Java 21；前端源码运行还需要 Node.js 和 pnpm。模型接口、外部聊天渠道和 MySQL 均需使用自己的配置。
+需要 Java 21；前端源码运行还需要 Node.js 18.19+ 和 pnpm 11。模型接口、外部聊天渠道和 MySQL 均需使用自己的配置。
+
+### 推荐：一键启动本地体验
+
+在仓库根目录执行：
+
+```bash
+./scripts/start-local.sh
+```
+
+脚本会检查 Java、Node.js、pnpm、端口和前端依赖，准备后端模块，启动 8087 后端与 3000 前端，并等待两个入口真正可访问。首次使用如果提示前端依赖未安装，先执行：
+
+```bash
+cd ui-react
+pnpm install --frozen-lockfile
+cd ..
+./scripts/start-local.sh
+```
+
+启动日志保存在被 Git 忽略的 `.jobclaw-dev/`，停止服务执行 `./scripts/stop-local.sh`。脚本不会自动覆盖已有 `.env`，也不会把前端构建产物复制到后端静态目录。
 
 ### 启动后端
 
@@ -37,13 +56,21 @@ cp .env.example .env
 
 ### 启动最新前端
 
-新页面请通过前端开发服务访问：
+新页面请通过前端开发服务访问。先运行带检查的启动脚本，它会在依赖缺失时立即给出安装命令，并提示后端是否已经启动：
 
 ```bash
 cd ui-react
-pnpm install
-pnpm dev
+node scripts/start-dev.mjs
 ```
+
+如果检查提示依赖未安装，再执行一次依赖安装：
+
+```bash
+pnpm install --frozen-lockfile
+node scripts/start-dev.mjs
+```
+
+无网络但本机已有完整 pnpm 缓存时，可以改用 `pnpm install --offline --frozen-lockfile`。也可以单独运行 `node scripts/frontend-doctor.mjs` 查看 Node.js、依赖、npm Registry 和后端健康检查结果。仓库已将 pnpm 的依赖校验设为先报错再停止，依赖未安装完成时不会自动同步 547 个包；推荐使用上面的启动脚本获得更具体的中文诊断。
 
 打开 <http://localhost:3000>，页面默认连接 `localhost:8087` 的后端。后端附带一份静态页面，但可能落后于前端源码；本轮新增的「我的求职」页面请在 `3000` 端口使用。
 

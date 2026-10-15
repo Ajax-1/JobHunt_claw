@@ -45,7 +45,7 @@ jobclaw:
     web-site-logo: ${JOBCLAW_SITE_WEBSITE_LOGO:/favicon.svg}
     web-site-host: ${JOBCLAW_SITE_WEBSITE_HOST:http://localhost}
     web-site-url: ${jobclaw.site.web-site-host}:${server.port}
-    auto-open: ${JOBCLAW_SITE_AUTO_OPEN:true} # 是否自动打开浏览器, 访问项目主页
+    auto-open: ${JOBCLAW_SITE_AUTO_OPEN:false} # 是否自动打开浏览器, 访问项目主页
   img:
     abs-tmp-path: ${JOBCLAW_IMG_ABS_TMP_PATH:/tmp/storage/}
     web-img-path: ${JOBCLAW_IMG_WEB_IMG_PATH:/oc/img/}

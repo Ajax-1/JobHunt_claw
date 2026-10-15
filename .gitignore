@@ -88,4 +88,6 @@ app/src/main/resources/application-private.yml
 /workspace/skills/
 /workspace/
 /.pnpm-store/
+/.m2/
+/.jobclaw-dev/
 !/README.md
