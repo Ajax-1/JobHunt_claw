@@ -65,8 +65,11 @@ export function ChatDialog({ onClose }: ChatDialogProps) {
   const isAdmin = userInfo?.role === 3;
   const visibleAgents = QUICK_AGENTS.filter((a) => !a.adminOnly || isAdmin);
   const agentLabel = visibleAgents.find((a) => a.id === currentAgent)?.label || currentAgent;
+  const lastMessage = messages[messages.length - 1];
+  const modelUnavailable = lastMessage?.role === "assistant"
+    && lastMessage.content.includes("尚未配置可用的 AI 服务商");
   const statusLabel = !userInfo ? "请先登录" : ({
-    disconnected: "未连接", connecting: "连接中…", connected: "已连接",
+    disconnected: "未连接", connecting: "连接中…", connected: "聊天连接已建立",
     reconnecting: "连接已断开，正在重连…", "auth-error": "登录已失效，请重新登录",
   } as const)[connectionState];
 
@@ -105,7 +108,10 @@ export function ChatDialog({ onClose }: ChatDialogProps) {
       </div>
 
       <div role="status" className="px-4 py-2 text-xs text-slate-600 bg-slate-50 flex items-center justify-between gap-2">
-        <span>{statusLabel}</span>
+        <span>{modelUnavailable ? "AI 模型尚未配置" : statusLabel}</span>
+        {modelUnavailable && isAdmin && (
+          <button onClick={() => { window.location.href = "/admin/llm-providers" }} className="text-blue-600 font-medium">去配置模型</button>
+        )}
         {(!userInfo || connectionState === "auth-error") && (
           <button onClick={() => setLoginOpen(true)} className="text-blue-600 font-medium">登录后开始对话</button>
         )}

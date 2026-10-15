@@ -91,7 +91,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [localHost, setLocalHost] = useState(false);
   const [loginLoading, setLoginLoading] = useState(false);
   const [adminLoading, setAdminLoading] = useState(false);
-  const { userInfo, setUserInfo, logout } = useLoginUser();
+  const { userInfo, setUserInfo, logout, authReady } = useLoginUser();
   const [sseUrl, setSseUrl] = useState("");
   const [env, setEnv] = useState<GlobalConfigItemValue[]>([]);
 
@@ -228,12 +228,16 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   // Periodically check user info validity (5 minutes)
   useEffect(() => {
     const checkUserInfoValidity = async () => {
+      if (!authReady) return;
       if (userInfo && userInfo.timestamp) {
         const now = Date.now();
         const fiveMinutes = 5 * 60 * 1000; // 5分钟有效期
         if (now - userInfo.timestamp > fiveMinutes) {
           try {
-            const updatedUser = await getUserDetail();
+            const updatedUser = await Promise.race([
+              getUserDetail(),
+              new Promise<null>((resolve) => setTimeout(() => resolve(null), 3000)),
+            ]);
             if (updatedUser) {
               const info = {
                 userId: updatedUser.userId,
@@ -248,7 +252,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               }
             }
           } catch (error) {
-            console.error("Failed to update user info:", error);
+            if (error instanceof Error && /未登录|登录态已失效|登录已过期/.test(error.message)) {
+              setUserInfo(null);
+              localStorage.removeItem("oc-user");
+              localStorage.removeItem("oc-token");
+              document.cookie = "oc-session=;path=/;expires=Thu, 01 Jan 1970 00:00:00 GMT";
+            }
           }
         }
       }
@@ -261,15 +270,15 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     const interval = setInterval(checkUserInfoValidity, 30000);
 
     return () => clearInterval(interval);
-  }, [userInfo, setUserInfo]);
+  }, [authReady, userInfo, setUserInfo]);
 
   return (
     <div className="min-h-screen bg-[#f7f8fa] flex flex-col">
       {/* 顶部导航栏 */}
       <header className="bg-white/95 backdrop-blur-xl border-b border-slate-200/80 fixed top-0 left-0 right-0 z-30">
         <div className="px-4 sm:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex min-w-0 items-center gap-4 sm:gap-8">
+          <div className="flex h-16 items-center justify-between gap-3">
+            <div className="flex min-w-0 flex-1 items-center gap-3 sm:gap-8">
               <div className="flex shrink-0 items-center">
                 {pathname?.startsWith("/admin") ? (
                   <div className="h-16 flex items-center justify-center font-bold text-xl tracking-wide mb-0 select-none">
@@ -283,7 +292,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   </div>
                 ) : (
                   <a href="/" className="transition-opacity hover:opacity-80">
-                    <PiLogo />
+                    <PiLogo wordmarkClassName="hidden sm:inline" />
                   </a>
                 )}
               </div>
@@ -292,10 +301,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   <AdminDomainNav pathname={pathname} />
                 </Suspense>
               ) : (
-                <nav className="flex items-center gap-4 text-sm sm:gap-7">
+                <nav aria-label="主导航" className="flex min-w-0 flex-1 items-center gap-4 overflow-x-auto whitespace-nowrap text-sm sm:gap-7">
                   <a
                     href="/"
-                    className={`${
+                    className={`shrink-0 ${
                       pathname === "/"
                         ? "text-blue-600 font-medium"
                         : "text-gray-700"
@@ -305,7 +314,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   </a>
                   <a
                     href="/internship"
-                    className={`${
+                    className={`shrink-0 ${
                       pathname === "/internship"
                         ? "text-blue-600 font-medium"
                         : "text-gray-700"
@@ -315,7 +324,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   </a>
                   <a
                     href="/internal"
-                    className={`${
+                    className={`shrink-0 ${
                       pathname === "/internal"
                         ? "text-blue-600 font-medium"
                         : "text-gray-700"
@@ -325,7 +334,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   </a>
                   <a
                     href="/applications"
-                    className={`${
+                    className={`shrink-0 ${
                       pathname === "/applications"
                         ? "text-blue-600 font-medium"
                         : "text-gray-700"
@@ -338,7 +347,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             </div>
             <div className="ml-3 flex shrink-0 items-center gap-3">
               {!pathname?.startsWith("/admin") && <span className="hidden text-xs text-slate-400 lg:block">让每一步求职更清晰</span>}
-              {userInfo ? (
+              {!authReady ? (
+                <span className="h-9 w-16 animate-pulse rounded-full bg-slate-100" aria-label="正在恢复登录状态" />
+              ) : userInfo ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <span className="flex items-center cursor-pointer rounded-full border border-slate-200 p-1">

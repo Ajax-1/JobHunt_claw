@@ -143,6 +143,12 @@ public class AdminOfferGatherController {
         return gatherTaskService.resetTaskState(taskId);
     }
 
+    @RequestMapping("/delete")
+    public Boolean delete(Long taskId) {
+        Assert.notNull(taskId, "taskId can not be null");
+        return gatherTaskService.deleteTask(taskId);
+    }
+
     @GetMapping(path = "/agentRun")
     public OcAgentState agentRun(Long taskId) {
         GatherTaskEntity task = gatherTaskService.getTask(taskId);

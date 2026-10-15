@@ -242,6 +242,20 @@ public class GatherTaskService {
         return true;
     }
 
+    /** 删除已结束的采集任务，避免失败记录长期占据任务队列。 */
+    public boolean deleteTask(Long taskId) {
+        GatherTaskEntity task = gatherTaskRepository.findById(taskId).orElse(null);
+        if (task == null) {
+            throw new BizException(StatusEnum.RECORDS_NOT_EXISTS, taskId + "非法");
+        }
+        if (Objects.equals(task.getState(), GatherTaskStateEnum.PROCESSING.getValue())) {
+            throw new BizException(StatusEnum.ILLEGAL_ARGUMENTS_MIXED, "任务处理中，暂不能删除");
+        }
+        gatherTaskRepository.delete(task);
+        gatherTaskRepository.flush();
+        return true;
+    }
+
     /**
      * 条件查询任务列表
      *

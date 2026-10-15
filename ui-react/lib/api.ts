@@ -184,7 +184,8 @@ export interface JobListResponse {
 export async function fetchJobList(
   params?: JobListQuery
 ): Promise<JobListResponse> {
-  const res = await api.get("/api/oc/list", { params });
+  // 岗位首页需要尽快把服务不可用和真实空结果区分开，避免沿用聊天接口的长超时。
+  const res = await api.get("/api/oc/list", { params, timeout: 15000 });
   if (res.data && res.data.code === 0) {
     // 将外层的在线人数写到内部
     res.data.data.online = res.data.online;
@@ -661,6 +662,14 @@ export async function reRunTask(taskId: number): Promise<boolean> {
   throw new Error(res.data?.msg || "重跑任务失败");
 }
 
+export async function deleteTask(taskId: number): Promise<boolean> {
+  const res = await api.get(`/api/admin/gather/delete?taskId=${taskId}`);
+  if (res.data && res.data.code === 0) {
+    return res.data.data === true;
+  }
+  throw new Error(res.data?.msg || "删除任务失败");
+}
+
 export interface GatherSourceListQuery {
   page?: number;
   size?: number;
@@ -1004,7 +1013,8 @@ export async function execLogout() {
 }
 
 export async function getUserDetail() {
-  const res = await api.get("/api/user/detail");
+  // 认证恢复和定时校验不能占用全局 6 分钟请求超时，否则首屏会一直等待。
+  const res = await api.get("/api/user/detail", { timeout: 3000 });
   if (res.data && res.data.code === 0) {
     return res.data.data;
   }

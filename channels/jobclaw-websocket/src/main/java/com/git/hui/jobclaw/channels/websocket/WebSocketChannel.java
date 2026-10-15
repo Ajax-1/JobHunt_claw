@@ -17,6 +17,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -208,13 +209,34 @@ public class WebSocketChannel extends AbsStreamChannel<WsMessage> {
             }
         }).doOnError(error -> {
             log.error("[WebSocket] Stream error for user: {}", userId, error);
-            WsResponseMessage errMsg = WsResponseMessage.error(msgId, "响应处理出错，请稍后重试");
+            WsResponseMessage errMsg = WsResponseMessage.error(msgId, userFacingStreamError(error));
             sessionManager.sendToUser(userId, "/queue/rsp/error", errMsg);
         }).doOnComplete(() -> {
             log.debug("[WebSocket] Stream completed for user: {}, contentLen={}", userId, contentBuf.length());
             WsResponseMessage doneMsg = WsResponseMessage.streamDone(msgId);
             sessionManager.sendToUser(userId, "/queue/rsp/done", doneMsg);
         }).subscribe(ignored -> { }, error -> { /* 错误已通过用户队列反馈。 */ });
+    }
+
+    /** 将模型配置异常转换成普通用户可以执行的下一步，避免只显示“稍后重试”。 */
+    private String userFacingStreamError(Throwable error) {
+        Throwable cause = error;
+        while (cause.getCause() != null && cause.getCause() != cause) {
+            cause = cause.getCause();
+        }
+        String message = cause.getMessage() == null ? "" : cause.getMessage();
+        String normalized = message.toLowerCase(Locale.ROOT);
+        if (message.contains("未找到厂商配置")
+                || message.contains("厂商未配置模型")
+                || message.contains("未找到模型配置")
+                || message.contains("未配置默认模型")
+                || message.contains("模型配置格式错误")
+                || message.contains("未找到模型提供者")
+                || normalized.contains("api key")
+                || normalized.contains("apikey")) {
+            return "尚未配置可用的 AI 服务商，请管理员进入“平台配置 → LLM供应商”配置文本模型和 API Key 后重试。";
+        }
+        return "AI 服务暂时不可用，请稍后重试；如果问题持续，请检查管理员的模型配置。";
     }
 
     /**

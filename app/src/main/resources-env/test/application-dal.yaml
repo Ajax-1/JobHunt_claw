@@ -16,3 +16,8 @@ spring:
       naming:
         physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
     show-sql: true
+
+# MySQL 环境不自动写入演示岗位，避免污染共享数据库。
+jobclaw:
+  demo-data:
+    enabled: ${JOBCLAW_DEMO_DATA_ENABLED:false}

@@ -44,8 +44,10 @@ function getCookie(name: string): string | null {
 const LoginUserContext = createContext<{
     userInfo: LoginUserInfo | null,
     setUserInfo: (u: LoginUserInfo | null) => void,
-    logout: () => void
-}>({ userInfo: null, setUserInfo: () => { }, logout: () => { } });
+    logout: () => void,
+    /** 首次恢复浏览器会话前，不渲染未登录门槛。 */
+    authReady: boolean,
+}>({ userInfo: null, setUserInfo: () => { }, logout: () => { }, authReady: false });
 
 export function useLoginUser() {
     return useContext(LoginUserContext);
@@ -53,12 +55,15 @@ export function useLoginUser() {
 
 export function LoginUserProvider({ children }: { children: React.ReactNode }) {
     const [userInfo, setUserInfo] = useState<LoginUserInfo | null>(null);
+    const [authReady, setAuthReady] = useState(false);
 
     useEffect(() => {
-        const fetchUserDetail = async () => {
+        let cancelled = false;
+
+        const refreshUserDetail = async () => {
             try {
                 const data = await getUserDetail();
-                if (data) {
+                if (data && !cancelled) {
                     const updatedInfo = {
                         userId: data.userId,
                         role: data.role,
@@ -72,58 +77,81 @@ export function LoginUserProvider({ children }: { children: React.ReactNode }) {
                     }
                 }
             } catch (error) {
-                console.error('Failed to fetch user detail:', error);
+                // 网络暂时不可用时保留本地会话；明确认证失败才清理它。
+                if (error instanceof Error && /未登录|登录态已失效|登录已过期/.test(error.message)) {
+                    setUserInfo(null);
+                    localStorage.removeItem('oc-user');
+                    localStorage.removeItem('oc-token');
+                    document.cookie = 'oc-session=;path=/;expires=Thu, 01 Jan 1970 00:00:00 GMT';
+                }
             }
         };
 
-        if (typeof window !== 'undefined') {
+        const hydrate = async () => {
+            if (typeof window === 'undefined') {
+                if (!cancelled) setAuthReady(true);
+                return;
+            }
+
+            let hasLocalSession = false;
             const localUser = localStorage.getItem('oc-user');
             const token = localStorage.getItem('oc-token');
             if (localUser && token && isJwtValid(token)) {
                 try {
-                    const userInfo = JSON.parse(localUser);
-                    // Check if user info is older than 5 minutes (300000 ms)
-                    const isExpired = userInfo.timestamp && (Date.now() - userInfo.timestamp > 300000);
-                      
-                    setUserInfo(userInfo);
-                      
-                    // If user info is expired, fetch fresh data
-                    if (isExpired) {
-                        fetchUserDetail();
-                    }
-                    return;
-                } catch { }
+                    const cachedUser = JSON.parse(localUser) as LoginUserInfo;
+                    setUserInfo(cachedUser);
+                    hasLocalSession = true;
+                    // 会话恢复后校验一次；后端暂时不可用时不能把首屏卡在登录状态。
+                    await Promise.race([
+                        refreshUserDetail(),
+                        new Promise<void>((resolve) => setTimeout(resolve, 3000)),
+                    ]);
+                } catch {
+                    localStorage.removeItem('oc-user');
+                    localStorage.removeItem('oc-token');
+                }
             } else {
                 localStorage.removeItem('oc-user');
                 localStorage.removeItem('oc-token');
             }
-        }
-        const cookieToken = getCookie('oc-session');
-        if (cookieToken && isJwtValid(cookieToken)) {
-            const jwt = parseJwt(cookieToken);
-            if (jwt) {
-                const info = {
-                    userId: jwt.uid,
-                    role: jwt.r,
-                    nickname: jwt.un,
-                    avatar: jwt.av,
-                    timestamp: Date.now() // Add timestamp when storing new user info
-                };
-                setUserInfo(info);
-                if (typeof window !== 'undefined') {
-                    localStorage.setItem('oc-user', JSON.stringify(info));
-                    localStorage.setItem('oc-token', cookieToken);
+
+            if (!hasLocalSession) {
+                const cookieToken = getCookie('oc-session');
+                if (cookieToken && isJwtValid(cookieToken)) {
+                    const jwt = parseJwt(cookieToken);
+                    if (jwt) {
+                        const info = {
+                            userId: jwt.uid,
+                            role: jwt.r,
+                            nickname: jwt.un,
+                            avatar: jwt.av,
+                            timestamp: Date.now()
+                        };
+                        setUserInfo(info);
+                        localStorage.setItem('oc-user', JSON.stringify(info));
+                        localStorage.setItem('oc-token', cookieToken);
+                    }
                 }
             }
-        }
+
+            if (!cancelled) setAuthReady(true);
+        };
+
+        void hydrate();
+        return () => { cancelled = true; };
     }, []);
 
     const logout = async () => {
-        // 调用后端接口
-        try {
-            await execLogout();
-        } catch (error) {
-            console.error('Failed to logout:', error);
+        // 没有令牌时无需请求后端；失效令牌返回“未登录”也视为退出完成。
+        const token = typeof window !== 'undefined' ? localStorage.getItem('oc-token') : null;
+        if (token) {
+            try {
+                await execLogout();
+            } catch (error) {
+                if (!(error instanceof Error && /未登录|登录态已失效|登录已过期/.test(error.message))) {
+                    console.warn('退出登录请求失败，将继续清理本地会话', error);
+                }
+            }
         }
 
         document.cookie = 'oc-session=;path=/;expires=Thu, 01 Jan 1970 00:00:00 GMT';
@@ -138,7 +166,7 @@ export function LoginUserProvider({ children }: { children: React.ReactNode }) {
     };
 
     return (
-        <LoginUserContext.Provider value={{ userInfo, setUserInfo, logout }}>
+        <LoginUserContext.Provider value={{ userInfo, setUserInfo, logout, authReady }}>
             {children}
         </LoginUserContext.Provider>
     );

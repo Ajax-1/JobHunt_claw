@@ -39,7 +39,7 @@ interface EditState {
 
 /** AI-GENERATED AIDEV-NOTE: 求职记录页面集中处理状态、备注和跟进日期，保持服务端记录为单一事实来源。 */
 export default function ApplicationsPage() {
-  const { userInfo } = useLoginUser()
+  const { userInfo, authReady } = useLoginUser()
   const { setLoginOpen } = useLoginModal()
   const { toast } = useToast()
   const [status, setStatus] = useState<ApplicationStatus | "ALL">("ALL")
@@ -103,6 +103,10 @@ export default function ApplicationsPage() {
     } finally { setDeletingId(null) }
   }
   const filteredLabel = useMemo(() => STATUS_OPTIONS.find(option => option.value === status)?.label, [status])
+
+  if (!authReady) {
+    return <main className="mx-auto flex min-h-[calc(100vh-8rem)] max-w-3xl items-center justify-center px-4 py-12"><section className="w-full rounded-2xl border border-slate-200 bg-white px-6 py-14 text-center shadow-sm sm:px-12" aria-label="正在恢复登录状态"><div className="mx-auto h-10 w-10 animate-pulse rounded-full bg-blue-100" /><div className="mx-auto mt-5 h-6 w-56 animate-pulse rounded bg-slate-100" /><div className="mx-auto mt-3 h-4 w-80 max-w-full animate-pulse rounded bg-slate-100" /></section></main>
+  }
 
   if (!userInfo) {
     return <main className="mx-auto flex min-h-[calc(100vh-8rem)] max-w-3xl items-center justify-center px-4 py-12"><section className="w-full rounded-2xl border border-slate-200 bg-white px-6 py-14 text-center shadow-sm sm:px-12"><Bookmark className="mx-auto h-10 w-10 text-blue-500" /><h1 className="mt-5 text-2xl font-semibold text-slate-950">登录后管理你的求职进度</h1><p className="mx-auto mt-3 max-w-md text-sm leading-7 text-slate-500">把感兴趣的岗位保存下来，记录投递、面试和后续跟进，不再靠记忆管理秋招。</p><Button className="mt-7" onClick={() => setLoginOpen(true)}>登录查看我的求职</Button></section></main>

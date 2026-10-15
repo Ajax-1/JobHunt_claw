@@ -26,6 +26,7 @@ import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 /**
@@ -84,7 +85,7 @@ public class MsgRouter {
             handleMessageReceived(event);
         } catch (Exception e) {
             log.error("处理用户消息失败: {}", event.getOriginalMessage().getMsgId(), e);
-            sendTextResponse(event.getOriginalMessage(), "抱歉，暂时无法处理这条消息，请稍后重试。");
+            sendTextResponse(event.getOriginalMessage(), userFacingLlmError(e));
         }
     }
 
@@ -204,8 +205,29 @@ public class MsgRouter {
             }
         } catch (Exception e) {
             log.error("LLM响应失败", e);
-            sendTextResponse(msg, "抱歉，服务出现故障，请稍后再试。");
+            sendTextResponse(msg, userFacingLlmError(e));
         }
+    }
+
+    /** 将模型配置异常转换成普通用户可以执行的下一步，避免只显示“稍后重试”。 */
+    private String userFacingLlmError(Throwable error) {
+        Throwable cause = error;
+        while (cause.getCause() != null && cause.getCause() != cause) {
+            cause = cause.getCause();
+        }
+        String message = cause.getMessage() == null ? "" : cause.getMessage();
+        String normalized = message.toLowerCase(Locale.ROOT);
+        if (message.contains("未找到厂商配置")
+                || message.contains("厂商未配置模型")
+                || message.contains("未找到模型配置")
+                || message.contains("未配置默认模型")
+                || message.contains("模型配置格式错误")
+                || message.contains("未找到模型提供者")
+                || normalized.contains("api key")
+                || normalized.contains("apikey")) {
+            return "尚未配置可用的 AI 服务商，请管理员进入“平台配置 → LLM供应商”配置文本模型和 API Key 后重试。";
+        }
+        return "AI 服务暂时不可用，请稍后重试；如果问题持续，请检查管理员的模型配置。";
     }
 
     private boolean sendTextResponse(ChannelReceiveMessage msg, String content) {

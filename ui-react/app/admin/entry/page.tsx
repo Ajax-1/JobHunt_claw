@@ -18,6 +18,7 @@ import {
   Play,
   RefreshCcw,
   Search,
+  Trash2,
   UploadCloud,
   X,
   type LucideIcon,
@@ -34,6 +35,7 @@ import {
   getAdminLlmProviders,
   devWxLogin,
   fetchTaskList,
+  deleteTask,
   reRunTask,
   submitAIEntry,
   type AdminLlmProviderConfig,
@@ -544,6 +546,7 @@ function EntryContent({
   const [taskLoading, setTaskLoading] = useState(false)
   const [taskError, setTaskError] = useState<string | null>(null)
   const [reRunLoadingId, setReRunLoadingId] = useState<number | null>(null)
+  const [deleteLoadingId, setDeleteLoadingId] = useState<number | null>(null)
   const [taskColumnWidths, setTaskColumnWidths] = useState<Record<TaskColumnKey, number>>(DEFAULT_TASK_COLUMN_WIDTHS)
   const [companyTypeOptions, setCompanyTypeOptions] = useState<GlobalConfigItemValue[]>([])
   const [recruitmentTypeOptions, setRecruitmentTypeOptions] = useState<GlobalConfigItemValue[]>([])
@@ -820,6 +823,20 @@ function EntryContent({
       })
     } finally {
       setReRunLoadingId(null)
+    }
+  }
+
+  const handleDelete = async (taskId: number) => {
+    if (!window.confirm("确定删除这条已结束的采集任务吗？删除后无法恢复。")) return
+    setDeleteLoadingId(taskId)
+    try {
+      await deleteTask(taskId)
+      toast({ title: "任务已删除" })
+      refreshTasks()
+    } catch (error: unknown) {
+      toast({ title: "删除失败", description: getErrorMessage(error), variant: "destructive" })
+    } finally {
+      setDeleteLoadingId(null)
     }
   }
 
@@ -1244,20 +1261,16 @@ function EntryContent({
                               </TableCell>
                               <TableCell className="text-sm text-content-tertiary">{formatDateTimeStr(task.updateTime)}</TableCell>
                               <TableCell className={STICKY_ACTION_CELL_CLASS}>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  className="h-8 gap-1.5"
-                                  disabled={reRunLoadingId === task.taskId}
-                                  onClick={() => handleReRun(task.taskId)}
-                                >
-                                  {reRunLoadingId === task.taskId ? (
-                                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                                  ) : (
-                                    <RefreshCcw className="h-3.5 w-3.5" />
-                                  )}
-                                  重跑
-                                </Button>
+                                <div className="flex justify-end gap-2">
+                                  <Button size="sm" variant="outline" className="h-8 gap-1.5" disabled={reRunLoadingId === task.taskId || deleteLoadingId === task.taskId} onClick={() => handleReRun(task.taskId)}>
+                                    {reRunLoadingId === task.taskId ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCcw className="h-3.5 w-3.5" />}
+                                    重跑
+                                  </Button>
+                                  {(task.state === 2 || task.state === 3) && <Button size="sm" variant="ghost" className="h-8 gap-1.5 text-rose-600 hover:text-rose-700" disabled={deleteLoadingId === task.taskId || reRunLoadingId === task.taskId} onClick={() => handleDelete(task.taskId)}>
+                                    {deleteLoadingId === task.taskId ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
+                                    删除
+                                  </Button>}
+                                </div>
                               </TableCell>
                             </TableRow>
                           )

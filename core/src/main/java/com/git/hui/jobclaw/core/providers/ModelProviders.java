@@ -264,6 +264,11 @@ public class ModelProviders {
         var providerInfo = resolved.providerConfig();
         var personModelInfo = resolved.modelInfo();
 
+        // 在真正发起网络请求前失败，前端才能提示管理员补齐供应商配置。
+        if (StringUtils.isBlank(providerInfo.getApiKey())) {
+            throw new RuntimeException("AI 服务商未配置 API Key: " + personModelInfo.getProvider());
+        }
+
         cacheManager.put(CURRENT_MODEL_CACHE, userId, personModelInfo);
 
         // 检查缓存

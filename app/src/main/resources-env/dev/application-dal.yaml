@@ -21,3 +21,8 @@ spring:
         physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
     show-sql: true
     database-platform: org.hibernate.dialect.H2Dialect
+
+# 本地 H2 首次启动时提供少量演示岗位，便于直接体验搜索和投递跟踪闭环。
+jobclaw:
+  demo-data:
+    enabled: ${JOBCLAW_DEMO_DATA_ENABLED:true}

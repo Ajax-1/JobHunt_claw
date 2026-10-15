@@ -14,6 +14,7 @@ import {
   Loader2,
   RotateCcw,
   Search,
+  Trash2,
   X,
   type LucideIcon,
 } from "lucide-react"
@@ -26,6 +27,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { TablePagination } from "@/components/ui/table-pagination"
 import {
   fetchTaskList,
+  deleteTask,
   reRunTask,
   type GlobalConfigItemValue,
   type TaskListItem,
@@ -270,6 +272,7 @@ export default function SourceTasksPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [reRunLoadingId, setReRunLoadingId] = useState<number | null>(null)
+  const [deleteLoadingId, setDeleteLoadingId] = useState<number | null>(null)
   const [taskStateOptions, setTaskStateOptions] = useState<GlobalConfigItemValue[]>([])
   const [taskTypeOptions, setTaskTypeOptions] = useState<GlobalConfigItemValue[]>([])
   const { toast } = useToast()
@@ -342,6 +345,20 @@ export default function SourceTasksPage() {
       })
     } finally {
       setReRunLoadingId(null)
+    }
+  }
+
+  const handleDelete = async (taskId: number) => {
+    if (!window.confirm("确定删除这条已结束的采集任务吗？删除后无法恢复。")) return
+    setDeleteLoadingId(taskId)
+    try {
+      await deleteTask(taskId)
+      toast({ title: "任务已删除" })
+      refresh()
+    } catch (err: unknown) {
+      toast({ title: "删除失败", description: getErrorMessage(err), variant: "destructive" })
+    } finally {
+      setDeleteLoadingId(null)
     }
   }
 
@@ -511,20 +528,22 @@ export default function SourceTasksPage() {
                           </TableCell>
                           <TableCell className="align-top text-sm text-content-tertiary">{formatDateTime(task.updateTime)}</TableCell>
                           <TableCell className="align-top text-right">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="h-8 gap-1.5"
-                              disabled={reRunLoadingId === task.taskId}
-                              onClick={() => handleReRun(task.taskId)}
-                            >
-                              {reRunLoadingId === task.taskId ? (
-                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                              ) : (
-                                <RotateCcw className="h-3.5 w-3.5" />
-                              )}
-                              重跑
-                            </Button>
+                            <div className="flex justify-end gap-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="h-8 gap-1.5"
+                                disabled={reRunLoadingId === task.taskId || deleteLoadingId === task.taskId}
+                                onClick={() => handleReRun(task.taskId)}
+                              >
+                                {reRunLoadingId === task.taskId ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RotateCcw className="h-3.5 w-3.5" />}
+                                重跑
+                              </Button>
+                              {(task.state === 2 || task.state === 3) && <Button size="sm" variant="ghost" className="h-8 gap-1.5 text-rose-600 hover:text-rose-700" disabled={deleteLoadingId === task.taskId || reRunLoadingId === task.taskId} onClick={() => handleDelete(task.taskId)}>
+                                {deleteLoadingId === task.taskId ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
+                                删除
+                              </Button>}
+                            </div>
                           </TableCell>
                         </TableRow>
                       )
