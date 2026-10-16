@@ -21,3 +21,5 @@ spring:
 jobclaw:
   demo-data:
     enabled: ${JOBCLAW_DEMO_DATA_ENABLED:false}
+  membership:
+    require-vip: ${JOBCLAW_MEMBERSHIP_REQUIRE_VIP:true}

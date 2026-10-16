@@ -26,3 +26,6 @@ spring:
 jobclaw:
   demo-data:
     enabled: ${JOBCLAW_DEMO_DATA_ENABLED:true}
+  # 本地演示让普通用户可以完成岗位详情、保存和投递跟踪闭环。
+  membership:
+    require-vip: ${JOBCLAW_MEMBERSHIP_REQUIRE_VIP:false}

@@ -9,6 +9,7 @@ import com.git.hui.jobclaw.core.apis.PageListVo;
 import com.git.hui.jobclaw.web.model.req.OcSearchReq;
 import com.git.hui.jobclaw.web.model.res.OcVo;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,6 +26,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class OcController {
     private final OcService ocService;
 
+    /**
+     * 本地演示允许普通用户走通岗位闭环，生产环境默认保留会员限制。
+     */
+    @Value("${jobclaw.membership.require-vip:true}")
+    private boolean membershipRequired;
+
     public OcController(OcService ocService) {
         this.ocService = ocService;
     }
@@ -40,7 +47,7 @@ public class OcController {
             req.setPage(1);
             req.setSize(5);
             locked = true;
-        } else if (ReqInfoContext.getReqInfo().getUser().role() == UserRoleEnum.NORMAL) {
+        } else if (membershipRequired && ReqInfoContext.getReqInfo().getUser().role() == UserRoleEnum.NORMAL) {
             // 非会员，永远只能看第一页的数据
             req.setPage(1);
             req.setSize(9);

@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator"
 import { externalUrl } from "@/lib/links"
 import { jobDetail } from "@/lib/api"
 import { SaveApplicationButton } from "@/components/jobs/SaveApplicationButton"
+import { useLoginUser } from "@/hooks/useLoginUser"
 
 interface JobDetail {
     id: number
@@ -36,28 +37,50 @@ export default function JobDetailPage() {
     const searchParams = useSearchParams()
     const router = useRouter()
     const [job, setJob] = useState<JobDetail | null>(null)
-    const [loading, setLoading] = useState(false)
+    const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
+    const { authReady } = useLoginUser()
 
     useEffect(() => {
-        const id = searchParams.get("id")
-        if (!id) {
-            setJob(null)
-            setError("未指定职位ID")
+        // 认证状态恢复完成前不要把尚未拿到的岗位误判成“不存在”。
+        if (!authReady) {
+            setLoading(true)
             return
         }
+
+        const id = searchParams.get("id")
+        setJob(null)
         setLoading(true)
         setError(null)
-        jobDetail(Number(id))
-            .then((data) => setJob(data))
-            .catch((err) => {
-                setJob(null)
-                setError(err.message || "获取职位信息失败")
-            })
-            .finally(() => setLoading(false))
-    }, [searchParams])
+        if (!id) {
+            setError("未指定职位ID")
+            setLoading(false)
+            return
+        }
+        const jobId = Number(id)
+        if (!Number.isInteger(jobId) || jobId <= 0) {
+            setError("职位ID无效")
+            setLoading(false)
+            return
+        }
 
-    if (loading) {
+        let active = true
+        jobDetail(jobId)
+            .then((data) => {
+                if (active) setJob(data)
+            })
+            .catch((err) => {
+                if (active) setError(err.message || "获取职位信息失败")
+            })
+            .finally(() => {
+                if (active) setLoading(false)
+            })
+        return () => {
+            active = false
+        }
+    }, [searchParams, authReady])
+
+    if (!authReady || loading) {
         return (
             <div className="min-h-screen flex items-center justify-center">
                 <div className="text-gray-500 text-lg">加载中...</div>

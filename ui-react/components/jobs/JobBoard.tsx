@@ -31,6 +31,12 @@ interface Recruitment {
 interface Filters { companyName: string; jobLocation: string; position: string; companyType: string; recruitmentType: string; recruitmentTarget: string; companyIndustry: string }
 interface JobBoardProps { internship?: boolean }
 const EMPTY: Filters = { companyName: "", jobLocation: "", position: "", companyType: "", recruitmentType: "", recruitmentTarget: "", companyIndustry: "" }
+// 本地 H2 可能没有执行 MySQL 的初始化字典；这些值与岗位数据的展示值保持一致。
+const DEFAULT_FILTER_DICTS: GlobalConfigItemValue[][] = [
+  ["央国企", "外企", "民企", "事业单位", "银行", "学校", "央企"].map(intro => ({ key: intro, value: intro, intro })),
+  ["社招", "春招", "秋招", "补录", "春招提前批", "秋招提前批", "日常实习", "暑期实习", "寒假实习"].map(intro => ({ key: intro, value: intro, intro })),
+  ["2025年毕业生", "2026年毕业生", "2027年毕业生", "2024与2025毕业生", "2025与2026毕业生", "其他"].map(intro => ({ key: intro, value: intro, intro })),
+]
 const dateLabel = (value?: string) => value?.replace(/年|月/g, ".").replace(/日/g, "").split("T")[0] || "日期待补充"
 
 /** AI-GENERATED AIDEV-NOTE: 校招与实习复用列表；编辑筛选不发请求，提交后统一分页。 */
@@ -47,11 +53,15 @@ export function JobBoard({ internship = false }: JobBoardProps) {
   const [locked, setLocked] = useState<boolean>(false)
   const [advanced, setAdvanced] = useState<boolean>(false)
   const [view, setView] = useState<"list" | "table">("list")
-  const [dicts, setDicts] = useState<GlobalConfigItemValue[][]>([[], [], []])
+  const [dicts, setDicts] = useState<GlobalConfigItemValue[][]>(DEFAULT_FILTER_DICTS)
   const { userInfo } = useLoginUser()
   const { setLoginOpen } = useLoginModal()
   const router = useRouter()
-  useEffect(() => { Promise.all(["CompanyTypeEnum", "RecruitmentTypeEnum", "RecruitmentTargetEnum"].map(key => getConfigValue("oc", key))).then(setDicts).catch(() => setDicts([[], [], []])) }, [])
+  useEffect(() => {
+    Promise.all(["CompanyTypeEnum", "RecruitmentTypeEnum", "RecruitmentTargetEnum"].map(key => getConfigValue("oc", key)))
+      .then(values => setDicts(values.map((items, index) => items.length ? items : DEFAULT_FILTER_DICTS[index])))
+      .catch(() => setDicts(DEFAULT_FILTER_DICTS))
+  }, [])
   useEffect(() => {
     let active = true
     const slowTimer = window.setTimeout(() => {
@@ -69,7 +79,7 @@ export function JobBoard({ internship = false }: JobBoardProps) {
       active = false
       window.clearTimeout(slowTimer)
     }
-  }, [query, page, size, internship])
+  }, [query, page, size, internship, userInfo?.userId])
   const reset = () => { setDraft(EMPTY); setQuery({ ...EMPTY }); setPage(1) }
   const openMembership = () => userInfo ? router.push("/user?tab=vip") : setLoginOpen(true)
   const select = (key: "companyType" | "recruitmentType" | "recruitmentTarget", label: string, options: GlobalConfigItemValue[]) => (
@@ -101,7 +111,7 @@ export function JobBoard({ internship = false }: JobBoardProps) {
         </div>
         {advanced && <div className="mt-4 grid gap-3 border-t border-slate-100 pt-4 sm:grid-cols-2">{select("companyType", "公司类型", dicts[0])}<Input aria-label="所属行业" placeholder="所属行业" value={draft.companyIndustry} onChange={e => setDraft({ ...draft, companyIndustry: e.target.value })} /></div>}
       </form>
-      <div className="mb-4 flex items-center justify-between"><div className="flex items-center gap-3"><h2 className="font-semibold text-slate-900">{internship ? "实习招聘" : "招聘机会"}</h2><span className="text-xs text-slate-500">{loading ? "正在加载…" : `${total} 条结果`}</span></div><div className="flex gap-1 rounded-lg border border-slate-200 bg-white p-1"><Button type="button" size="sm" variant={view === "list" ? "secondary" : "ghost"} aria-pressed={view === "list"} onClick={() => setView("list")}><LayoutList />列表</Button><Button type="button" size="sm" variant={view === "table" ? "secondary" : "ghost"} aria-pressed={view === "table"} onClick={() => setView("table")}><Table2 />表格</Button></div></div>
+      <div className="mb-4 flex items-center justify-between"><div className="flex items-center gap-3"><h2 className="font-semibold text-slate-900">{internship ? "实习招聘" : "招聘机会"}</h2><span className="text-xs text-slate-500">{error ? "结果暂不可用" : loading ? "正在加载…" : `${total} 条结果`}</span></div><div className="flex gap-1 rounded-lg border border-slate-200 bg-white p-1"><Button type="button" size="sm" variant={view === "list" ? "secondary" : "ghost"} aria-pressed={view === "list"} onClick={() => setView("list")}><LayoutList />列表</Button><Button type="button" size="sm" variant={view === "table" ? "secondary" : "ghost"} aria-pressed={view === "table"} onClick={() => setView("table")}><Table2 />表格</Button></div></div>
       {error ? <div role="alert" className="empty-panel"><Search className="mx-auto mb-3 h-8 w-8 text-rose-300" /><h3 className="font-medium text-slate-800">招聘信息暂时加载失败</h3><p className="mt-2 break-words text-sm">{error}</p><Button className="mt-4" onClick={() => setQuery({ ...query })}>重新加载</Button></div> : loading ? <div aria-label="正在加载招聘信息" className="space-y-3"><div className="rounded-2xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-800">{slowLoading ? "加载时间比平时长，可能是服务正在唤醒。你可以继续等待，或稍后重新加载。" : "正在加载招聘信息…"}</div>{[0,1,2].map(i => <div key={i} className="h-36 animate-pulse rounded-2xl border border-slate-100 bg-white" />)}</div> : !rows.length ? <div className="empty-panel"><Search className="mx-auto mb-3 h-8 w-8 text-slate-300" /><h3 className="font-medium text-slate-800">{hasActiveFilters ? "暂未找到匹配的招聘" : "岗位库暂时还没有招聘信息"}</h3><p className="mt-2 text-sm">{hasActiveFilters ? "试着减少筛选条件，看看更多机会。" : "管理员发布岗位后会显示在这里，也可以稍后重新加载。"}</p><div className="mt-5 flex flex-wrap justify-center gap-3"><Button variant="outline" onClick={() => setQuery({ ...query })}>重新加载</Button>{hasActiveFilters && <Button variant="ghost" onClick={reset}>清除筛选</Button>}</div></div> : <>
         {locked && <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-blue-100 bg-blue-50 p-4"><span className="flex items-center gap-2 text-sm text-blue-800"><LockKeyhole className="h-4 w-4" />登录并开通会员后，可查看完整招聘信息。</span><Button size="sm" onClick={openMembership}>{userInfo ? "查看会员权益" : "登录查看"}</Button></div>}
         {view === "list" ? <div className="space-y-3">{rows.map(job => <article key={job.id} className="group flex flex-col gap-5 rounded-2xl border border-slate-200/80 bg-white p-5 transition-colors hover:border-blue-200 sm:flex-row sm:p-6">

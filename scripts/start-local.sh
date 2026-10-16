@@ -140,8 +140,8 @@ fi
 check_port 8087
 check_port 3000
 
-echo "正在准备后端依赖，Maven 首次运行需要访问 Maven Central；日志：$BACKEND_LOG"
-if ! run_maven -DskipTests install >"$STATE_DIR/maven-install.log" 2>&1; then
+echo "正在准备后端依赖并进行一次干净编译，Maven 首次运行需要访问 Maven Central；日志：$BACKEND_LOG"
+if ! run_maven clean install -DskipTests >"$STATE_DIR/maven-install.log" 2>&1; then
   echo "后端依赖或编译准备失败，最后的日志如下：" >&2
   tail -n 80 "$STATE_DIR/maven-install.log" >&2 || true
   echo >&2
@@ -150,26 +150,62 @@ if ! run_maven -DskipTests install >"$STATE_DIR/maven-install.log" 2>&1; then
   exit 1
 fi
 
+# AI-GENERATED AIDEV-NOTE: 先检查启动类和 SparkOptions，避免增量编译残留。
+# AI 采集模块会在启动时加载 SparkOptions。检查编译产物，避免增量编译残留
+# 让 spring-boot:run 在看似编译成功后才以 NoClassDefFoundError 退出。
+required_class_files=(
+  "$ROOT_DIR/app/target/classes/com/git/hui/jobclaw/JobClawApplication.class"
+  "$ROOT_DIR/app/target/classes/com/git/hui/jobclaw/gather/service/ai/impl/spark/config/SparkOptions.class"
+)
+for class_file in "${required_class_files[@]}"; do
+  if [[ ! -f "$class_file" ]]; then
+    echo "编译完成检查未通过，缺少：${class_file#$ROOT_DIR/}" >&2
+    echo "请查看 $STATE_DIR/maven-install.log，确认 Maven 没有使用过期或不完整的 target 目录。" >&2
+    exit 1
+  fi
+done
+echo "后端编译完成，已确认启动所需的类文件存在。"
+
 rm -f "$BACKEND_PID_FILE" "$FRONTEND_PID_FILE"
 
-(
-  cd "$ROOT_DIR"
-  if (( ${#maven_args[@]} > 0 )); then
-    exec ./mvnw "${maven_args[@]}" -pl app spring-boot:run
-  else
-    exec ./mvnw -pl app spring-boot:run
-  fi
-) >"$BACKEND_LOG" 2>&1 &
-backend_pid=$!
-echo "$backend_pid" >"$BACKEND_PID_FILE"
+backend_attempt=1
+while true; do
+  rm -f "$BACKEND_PID_FILE"
+  (
+    cd "$ROOT_DIR"
+    if (( ${#maven_args[@]} > 0 )); then
+      exec ./mvnw "${maven_args[@]}" -pl app spring-boot:run
+    else
+      exec ./mvnw -pl app spring-boot:run
+    fi
+  ) >"$BACKEND_LOG" 2>&1 &
+  backend_pid=$!
+  echo "$backend_pid" >"$BACKEND_PID_FILE"
 
-echo "正在等待后端健康检查（最多 180 秒）……"
-if ! wait_for_url "http://127.0.0.1:8087/actuator/health" 180 "$backend_pid"; then
+  echo "正在等待后端健康检查（最多 180 秒，第 ${backend_attempt} 次）……"
+  if wait_for_url "http://127.0.0.1:8087/actuator/health" 180 "$backend_pid"; then
+    break
+  fi
+
+  # 仅对已知的类路径竞态自动重试一次，配置/数据库错误仍然立即失败并给出日志。
+  if (( backend_attempt == 1 )) && grep -Eq "NoClassDefFoundError|ClassNotFoundException" "$BACKEND_LOG"; then
+    echo "检测到后端类路径加载失败，将清理编译产物并重试一次。详情：$BACKEND_LOG" >&2
+    stop_process_from_file "$BACKEND_PID_FILE"
+    if ! run_maven clean install -DskipTests >"$STATE_DIR/maven-install.log" 2>&1; then
+      echo "后端重编译失败，最后的日志如下：" >&2
+      tail -n 100 "$STATE_DIR/maven-install.log" >&2 || true
+      exit 1
+    fi
+    backend_attempt=2
+    continue
+  fi
+
   echo "后端没有在预期时间内启动，最后的日志如下：" >&2
   tail -n 100 "$BACKEND_LOG" >&2 || true
   stop_process_from_file "$BACKEND_PID_FILE"
+  echo "可先执行 ./scripts/stop-local.sh 清理残留进程，再根据上述日志修复网络、数据库或配置问题。" >&2
   exit 1
-fi
+done
 
 (
   cd "$ROOT_DIR/ui-react"

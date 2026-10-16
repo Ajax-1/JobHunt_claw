@@ -301,7 +301,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   <AdminDomainNav pathname={pathname} />
                 </Suspense>
               ) : (
-                <nav aria-label="主导航" className="flex min-w-0 flex-1 items-center gap-4 overflow-x-auto whitespace-nowrap text-sm sm:gap-7">
+                <nav aria-label="主导航" className="flex min-w-0 flex-1 items-center gap-3 overflow-x-auto whitespace-nowrap text-sm sm:gap-7">
                   <a
                     href="/"
                     className={`shrink-0 ${
@@ -330,7 +330,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                         : "text-gray-700"
                     } hover:text-blue-600`}
                   >
-                    内推广场
+                    <span className="hidden min-[381px]:inline">内推广场</span>
+                    <span className="inline min-[381px]:hidden">内推</span>
                   </a>
                   <a
                     href="/applications"
@@ -345,7 +346,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 </nav>
               )}
             </div>
-            <div className="ml-3 flex shrink-0 items-center gap-3">
+            <div className="ml-1 flex shrink-0 items-center gap-1 sm:ml-3 sm:gap-3">
               {!pathname?.startsWith("/admin") && <span className="hidden text-xs text-slate-400 lg:block">让每一步求职更清晰</span>}
               {!authReady ? (
                 <span className="h-9 w-16 animate-pulse rounded-full bg-slate-100" aria-label="正在恢复登录状态" />
