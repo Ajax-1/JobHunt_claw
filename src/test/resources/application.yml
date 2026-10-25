@@ -1,0 +1,17 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:radar-test;DB_CLOSE_DELAY=-1
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+
+radar:
+  collect:
+    cron: "-"
+    zone: Asia/Shanghai
+    run-on-startup: false
+    request-interval-ms: 0
+    detail-interval-ms: 0
+    disabled-sources: []
+  mcp:
+    token: ""

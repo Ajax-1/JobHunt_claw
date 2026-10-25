@@ -1,0 +1,54 @@
+{
+ "message": "",
+ "status": 0,
+ "data": {
+  "positionList": [
+   {
+    "id": 22444,
+    "position": 783,
+    "positionTitle": "AI全栈工程师",
+    "positionFamily": 2,
+    "projectId": 1,
+    "bgs": "CDG CSIG IEG PCG TEG WXG ",
+    "workCities": "深圳总部 北京 上海 广州 成都 杭州 ",
+    "positionUrl": null,
+    "positionSource": "oa",
+    "projectName": "应届毕业生",
+    "recruitLabelName": "应届毕业生",
+    "groupTag": null,
+    "postId": "1282707398326592512"
+   },
+   {
+    "id": 22441,
+    "position": 784,
+    "positionTitle": "Agent开发工程师",
+    "positionFamily": 2,
+    "projectId": 1,
+    "bgs": "CDG CSIG IEG PCG TEG WXG ",
+    "workCities": "深圳总部 北京 上海 广州 成都 ",
+    "positionUrl": null,
+    "positionSource": "oa",
+    "projectName": "应届毕业生",
+    "recruitLabelName": "应届毕业生",
+    "groupTag": null,
+    "postId": "1282707395466077184"
+   },
+   {
+    "id": 22442,
+    "position": 785,
+    "positionTitle": "AI应用工程师",
+    "positionFamily": 2,
+    "projectId": 1,
+    "bgs": "CSIG IEG PCG TEG WXG ",
+    "workCities": "深圳总部 北京 上海 广州 成都 ",
+    "positionUrl": null,
+    "positionSource": "oa",
+    "projectName": "应届毕业生",
+    "recruitLabelName": "应届毕业生",
+    "groupTag": null,
+    "postId": "1282707395466077185"
+   }
+  ],
+  "count": 1021
+ }
+}

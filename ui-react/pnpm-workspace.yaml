@@ -1,8 +1,0 @@
-# pnpm 11 otherwise tries to repair an incomplete node_modules before running scripts.
-verifyDepsBeforeRun: error
-
-# These packages only have optional or legacy install scripts in local development.
-allowBuilds:
-  core-js: false
-  fsevents: false
-  sharp: false

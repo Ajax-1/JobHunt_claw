@@ -1,0 +1,172 @@
+{
+ "data": {
+  "list": [
+   {
+    "jobUnionId": "4634824849",
+    "name": "小象超市-招聘实习生",
+    "projectId": null,
+    "projectName": null,
+    "jobType": "2",
+    "jobSpecialCode": "6",
+    "jobSource": "1",
+    "jobStatus": "000",
+    "jobFamily": "职能类",
+    "jobFamilyGroup": "人力资源",
+    "cityList": [
+     {
+      "code": null,
+      "name": "北京市",
+      "children": null,
+      "sort": null,
+      "subCode": null,
+      "mapping": null,
+      "outerCode": null,
+      "bgNode": false
+     }
+    ],
+    "workYear": null,
+    "department": [
+     {
+      "code": null,
+      "name": "人力资源平台",
+      "children": null,
+      "sort": null,
+      "subCode": null,
+      "mapping": null,
+      "outerCode": null,
+      "bgNode": false
+     }
+    ],
+    "desc": "",
+    "departmentIntro": null,
+    "jobDuty": "1.协助人力资源部门进行招聘工作，包括发布招聘信息、筛选简历、安排面试等。\n2.协助组织招聘活动，吸引优秀人才加入业务团队。\n3.协助进行员工档案管理和招聘数据统计工作。\n4.参与其他相关招聘项目工作。",
+    "jobRequirement": "1.本科及以上学历，27届及以后在校生；\n2.实习时间可以保证每周5天优先，至少持续3个月以上；\n3.沟通界面良好，有比较强的目标感和结果意识；\n4.积极主动学习、思考和解决问题，有比较强的责任心，踏实有耐心。",
+    "precedence": null,
+    "highLight": "岗位亮点:\n1.深度到小象超市的人才招聘工作中，学习和成长的机会丰富。\n2.可以锻炼自己的招聘技能，积累人力资源管理经验。\n3.获得学习资源，为未来职业发展打下坚实基础。",
+    "otherInfo": null,
+    "firstPostTime": null,
+    "refreshTime": 1792836011000,
+    "tag": null,
+    "expiredTime": null,
+    "socialRecommendJob": null
+   },
+   {
+    "jobUnionId": "4839165773",
+    "name": "商家体验运营实习生",
+    "projectId": null,
+    "projectName": null,
+    "jobType": "2",
+    "jobSpecialCode": "6",
+    "jobSource": "1",
+    "jobStatus": "000",
+    "jobFamily": "运营类",
+    "jobFamilyGroup": "产品运营",
+    "cityList": [
+     {
+      "code": null,
+      "name": "上海市",
+      "children": null,
+      "sort": null,
+      "subCode": null,
+      "mapping": null,
+      "outerCode": null,
+      "bgNode": false
+     }
+    ],
+    "workYear": null,
+    "department": [
+     {
+      "code": null,
+      "name": "核心本地商业-美团平台",
+      "children": null,
+      "sort": null,
+      "subCode": null,
+      "mapping": null,
+      "outerCode": null,
+      "bgNode": false
+     }
+    ],
+    "desc": "",
+    "departmentIntro": null,
+    "jobDuty": "1. 作为助手，为外卖商家体验运营的体验问题定位、分析、解决、评估提供全流程支持。\n2. 工作内容包括但不限于案面资料收集、后台数据分析、用户调研等；\n3. 协助参与支持商家侧重点项目的体验相关工作，如规则制定、服务标准及流程优化方案、体验评估指标制定和监测等；\n4.  参与到AI相关模型的训练与调试。",
+    "jobRequirement": "1.本科大三或研究生；\n2.有体验运营/服务运营等实习经验的优先考虑；\n3.具有一定的数据敏感性，优秀的分析总结能力，熟练使用各类办公软件；\n4.会sql等基础数据分析语句；对AI的应用和局限性有基本了解。\n5.每周至少在岗4天；",
+    "precedence": null,
+    "highLight": "1. 深入参与商家运营核心业务与AI相关能力在企业的实际应用建设，积累一线运营实战经验。  \n2. 与资深运营团队紧密合作，获得专业指导与成长机会。  \n3. 工作地点位于上海核心商圈，办公环境优越，团队氛围开放。",
+    "otherInfo": null,
+    "firstPostTime": null,
+    "refreshTime": 1792821614000,
+    "tag": null,
+    "expiredTime": null,
+    "socialRecommendJob": null
+   },
+   {
+    "jobUnionId": "4858498338",
+    "name": "实习-餐饮类客户美工设计-成都&北京",
+    "projectId": null,
+    "projectName": null,
+    "jobType": "2",
+    "jobSpecialCode": "6",
+    "jobSource": "1",
+    "jobStatus": "000",
+    "jobFamily": "销售、客服与支持类",
+    "jobFamilyGroup": "业务支持",
+    "cityList": [
+     {
+      "code": null,
+      "name": "成都市",
+      "children": null,
+      "sort": null,
+      "subCode": null,
+      "mapping": null,
+      "outerCode": null,
+      "bgNode": false
+     },
+     {
+      "code": null,
+      "name": "北京市",
+      "children": null,
+      "sort": null,
+      "subCode": null,
+      "mapping": null,
+      "outerCode": null,
+      "bgNode": false
+     }
+    ],
+    "workYear": null,
+    "department": [
+     {
+      "code": null,
+      "name": "软硬件服务-餐饮SaaS事业部",
+      "children": null,
+      "sort": null,
+      "subCode": null,
+      "mapping": null,
+      "outerCode": null,
+      "bgNode": false
+     }
+    ],
+    "desc": "",
+    "departmentIntro": null,
+    "jobDuty": "1. 负责餐饮类客户的视觉设计需求，包括海报、菜单、宣传页等物料的设计与优化。  \n2. 配合客户运营团队，理解客户需求并转化为具有吸引力的视觉方案。  \n3. 参与品牌视觉风格的统一与提升，确保设计风格符合客户品牌调性。  \n4. 协助完成线上及线下活动的视觉支持工作，提升客户满意度与活动效果。",
+    "jobRequirement": "1. 大学本科及以上学历，设计类相关专业优先。  \n2. 熟练使用平面设计，美工设计，VI&UI等设计工具。  \n3. 具备良好的审美能力和创意表达能力，对餐饮行业有一定了解。  \n4. 工作细致、责任心强，具备良好的沟通能力和团队协作精神。",
+    "precedence": null,
+    "highLight": "1. 实习期间可接触真实商业项目，积累餐饮行业设计经验。  \n2. 获得资深设计师指导，快速提升专业技能。  \n3. 工作地点灵活，可选择成都或北京办公。  \n4. 表现优异者有机会获得转正机会。",
+    "otherInfo": null,
+    "firstPostTime": null,
+    "refreshTime": 1792810888000,
+    "tag": null,
+    "expiredTime": null,
+    "socialRecommendJob": null
+   }
+  ],
+  "page": {
+   "pageNo": 1,
+   "pageSize": 3,
+   "totalPage": 125,
+   "totalCount": 375
+  },
+  "traceId": null
+ },
+ "status": 1,
+ "message": "成功"
+}

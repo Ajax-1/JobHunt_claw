@@ -1,93 +1,9 @@
-HELP.md
 target/
-.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
-
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
-
-### IntelliJ IDEA ###
-.idea
-*.iws
+data/
+*.log
+.idea/
 *.iml
-*.ipr
-
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
-
-### VS Code ###
 .vscode/
-
-### 支付证书
-app/src/main/resources/cert
-app/src/main/resources/application-private.yaml
-app/src/main/resources-env/dev/application-pay.yml
-
-# 本地开发数据库不提交到仓库
-
-.env
-.env.*
-!.env.example
-
-logs/
-
-docs/back
-docs/mem
-
-workspace/datas/jobclaw.trace.db
-workspace/datas/jobclaw.mv.db
-workspace/datas/jobclaw-my.trace.db
-workspace/datas/jobclaw-my.mv.db
-workspace/channel
-workspace/conversations
-workspace/AGENT.private.md
-workspace/tasks
-workspace/users
-workspace/sessions
-workspace/archives
-app/src/main/resources/application-private.yml
-# Local runtime data, including databases started from app/
-/app/workspace/
-*.mv.db
-*.trace.db
-/.playwright-cli
-/docs/imgs
-
-# macOS metadata
 .DS_Store
-
-.agents/
-
-.qoder/
-
-# Private notes and research kept outside the public source tree
-/docs/
-/jobclaw-research/
-/AGENTS.md
-/CLAUDE.md
-/image.md
-/readme.md
-**/readme.md
-**/README.md
-**/DESIGN.md
-**/mem.md
-/workspace/skills/
-/workspace/
-/.pnpm-store/
-/.m2/
-/.jobclaw-dev/
-!/README.md
+.env
+.radar_token

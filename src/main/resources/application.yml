@@ -1,0 +1,77 @@
+server:
+  port: 8090
+  error:
+    # 400 时把「没有收录公司…」这类提示返回给调用方
+    include-message: always
+
+spring:
+  application:
+    name: campus-radar
+  datasource:
+    url: jdbc:h2:file:./data/campus-radar;AUTO_SERVER=TRUE
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+  ai:
+    mcp:
+      server:
+        name: campus-radar
+        version: 0.1.0
+        type: SYNC
+        # 显式指定：Spring AI 2.0.1 在未设置时实际启用的是 SSE（spring-projects/spring-ai#7207）
+        protocol: STREAMABLE
+        instructions: >-
+          国内校招岗位库，数据来自各公司校招官网，每天自动更新。
+          先用 search_jobs 按公司、城市、关键词筛选，再用 get_job 查看完整 JD 和官网投递链接。
+          投递请引导用户打开 applyUrl 在官网完成，不要替用户提交。
+
+radar:
+  collect:
+    # 每天北京时间 7 点采集一次
+    cron: "0 0 7 * * *"
+    zone: Asia/Shanghai
+    run-on-startup: false
+    request-interval-ms: 400
+    detail-interval-ms: 300
+    disabled-sources: []
+  mcp:
+    token: ${RADAR_MCP_TOKEN:}
+  # 飞书招聘系统的校招站点，同一个适配器；加一家公司只需加一项（2026-10-25 逐个验证可用）
+  feishu-sites:
+    - source: bytedance
+      company: 字节跳动
+      base-url: https://jobs.bytedance.com
+      aliases: [字节, ByteDance, 抖音, TikTok, 今日头条]
+    - source: xiaopeng
+      company: 小鹏汽车
+      base-url: https://xiaopeng.jobs.feishu.cn
+      aliases: [小鹏, XPeng, 小鹏集团]
+    - source: nio
+      company: 蔚来
+      base-url: https://nio.jobs.feishu.cn
+      aliases: [NIO, 蔚来汽车]
+    - source: thundersoft
+      company: 中科创达
+      base-url: https://thundersoft.jobs.feishu.cn
+      aliases: [ThunderSoft]
+    - source: insta360
+      company: 影石Insta360
+      base-url: https://arashivision.jobs.feishu.cn
+      aliases: [影石, Insta360, 影石创新]
+    - source: modelbest
+      company: 面壁智能
+      base-url: https://modelbest.jobs.feishu.cn
+      aliases: [面壁, ModelBest]
+    - source: desaysv
+      company: 德赛西威
+      base-url: https://yesv-desaysv.jobs.feishu.cn
+      aliases: [Desay SV, 德赛]
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health

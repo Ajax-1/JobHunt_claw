@@ -1,0 +1,738 @@
+{
+ "code": 0,
+ "data": {
+  "job_post_list": [
+   {
+    "id": "7699705491778668836",
+    "title": "校招-产品采购（售后零件）",
+    "sub_title": null,
+    "description": "1. 负责与售后部门紧密配合，协调沟通，对接整车售后零部件采购；\n2. 负责售后零部件商务合同和价格协议的签署；\n3. 负责跟进售后件正式采购单价的维护；\n4. 协助业务部门解决售后零部件在下单&交付过程中遇到的问题，与业务部门或合作伙伴沟通。",
+    "requirement": "1.本科及以上学历，理工科背景优先\n2.为人真诚，对采购及供应链行业感兴趣\n3.熟练使用office等办公软件\n4.有较强的学习能力，抗压能力及应变能力，勤奋踏实，有良好的团队合作精神",
+    "job_category": null,
+    "city_info": null,
+    "recruit_type": {
+     "id": "201",
+     "name": "正式",
+     "en_name": "Regular",
+     "i18n_name": "正式",
+     "depth": 2,
+     "parent": {
+      "id": "2",
+      "name": "校招",
+      "en_name": "Campus",
+      "i18n_name": "校招",
+      "depth": 1,
+      "parent": null,
+      "children": null,
+      "active_status": 1,
+      "selectability": 1
+     },
+     "children": null,
+     "active_status": 1,
+     "selectability": 1
+    },
+    "publish_time": 1792727846903,
+    "job_hot_flag": null,
+    "job_subject": {
+     "id": "7670808301186205962",
+     "name": {
+      "zh_cn": "2027届校园招聘-正式批",
+      "en_us": null,
+      "i18n": "2027届校园招聘-正式批"
+     },
+     "limit_count": null,
+     "active_status": 1,
+     "subject_group_info": null
+    },
+    "code": "A185904",
+    "department_id": null,
+    "job_function": {
+     "id": "7257445594599819576",
+     "name": "采购与供应链",
+     "en_name": "Purchasing and Supply Chain",
+     "i18n_name": "采购与供应链",
+     "parent_id": null,
+     "index": null,
+     "active_status": null,
+     "biz_create_time": null,
+     "biz_modify_time": null,
+     "parent": {
+      "id": "7257443883902011707",
+      "name": "职能与支持",
+      "en_name": "Administration & Support",
+      "i18n_name": "职能与支持",
+      "parent_id": null,
+      "index": null,
+      "active_status": null,
+      "biz_create_time": null,
+      "biz_modify_time": null,
+      "parent": null
+     }
+    },
+    "job_process_id": "7649576413712910628",
+    "recommend_id": null,
+    "city_list": [
+     {
+      "code": "CT_125",
+      "name": "上海",
+      "en_name": "Shanghai",
+      "location_type": null,
+      "i18n_name": "上海",
+      "py_name": null,
+      "mdm_code": null,
+      "node_status": null
+     }
+    ],
+    "job_post_info": {
+     "id": null,
+     "job_id": null,
+     "title": null,
+     "sub_title": null,
+     "address_id": null,
+     "address": null,
+     "city": null,
+     "education": null,
+     "experience": null,
+     "description": null,
+     "requirement": null,
+     "min_salary": null,
+     "max_salary": null,
+     "currency": null,
+     "head_count": null,
+     "crator_id": null,
+     "expiry_time": null,
+     "progress": null,
+     "department_id": null,
+     "job_type": null,
+     "recruitment_type": {
+      "id": "201",
+      "name": "正式",
+      "en_name": "Regular",
+      "i18n_name": "正式",
+      "depth": 2,
+      "parent": {
+       "id": "2",
+       "name": "校招",
+       "en_name": "Campus",
+       "i18n_name": "校招",
+       "depth": 1,
+       "parent": null,
+       "children": null,
+       "active_status": 1,
+       "selectability": 1
+      },
+      "children": null,
+      "active_status": 1,
+      "selectability": 1
+     },
+     "job_process_time": null,
+     "job_in_charge_user_id": null,
+     "biz_create_time": null,
+     "HighlightList": null,
+     "JobChannelPublishList": null,
+     "required_degree": 6,
+     "never_expiry": null,
+     "job_hot_flag": null,
+     "subject": null,
+     "sequence": null,
+     "min_level": null,
+     "max_level": null,
+     "job_post_object_value_map": {},
+     "code": null,
+     "job_active_status": null,
+     "job_process_type": null,
+     "biz_modify_time": null,
+     "job_function": null,
+     "job_process": null,
+     "job_process_id": null,
+     "job_category": null,
+     "address_list": [
+      {
+       "id": "7158407724894666754",
+       "name": "田林路889号（漕宝路1355号）科技绿洲五期19号楼",
+       "en_name": "Building 19, CHJ Hi-Tech Oasis Phase 5, NO.889 Tianlin Road(No. 1355 Caobao Road), Minhang District, Shanghai",
+       "district": {
+        "district_code": "DS_215",
+        "name": "闵行区",
+        "en_name": "Minhang",
+        "i18n_name": "闵行区"
+       },
+       "city": {
+        "city_code": "CT_125",
+        "name": "上海",
+        "en_name": "Shanghai",
+        "i18n_name": "上海",
+        "py_name": "shanghai"
+       },
+       "state": {
+        "state_code": "ST_47",
+        "name": "上海",
+        "en_name": "Shanghai",
+        "i18n_name": "上海"
+       },
+       "country": {
+        "country_code": "CN_1",
+        "name": "中国大陆",
+        "en_name": "Chinese Mainland",
+        "i18n_name": "中国大陆"
+       },
+       "i18n_name": "田林路889号（漕宝路1355号）科技绿洲五期19号楼",
+       "active_status": 1
+      }
+     ],
+     "city_list": null,
+     "correlation_job_list": null,
+     "tag_list": null,
+     "department": null,
+     "job_storefront_mode": null,
+     "storefront_list": null,
+     "target_major_list": null,
+     "schema": null,
+     "job_post_process_time_list": null,
+     "job_level_id_list": null
+    },
+    "tag_list": [
+     {
+      "id": "7397248736818432295",
+      "name": {
+       "name": "推荐投递",
+       "en_name": "推荐投递",
+       "i18n_name": "推荐投递"
+      },
+      "order": 78,
+      "style": "{\"backgroundColor\":\"rgba(245, 74, 69, 0.2)\",\"color\":\"rgba(98, 28, 24, 1)\"}",
+      "scope_list": [
+       {
+        "id": "7397248954985564425",
+        "name": {
+         "name": "2027届蔚来校园招募",
+         "en_name": null,
+         "i18n_name": "2027届蔚来校园招募"
+        },
+        "channel_id": "7265158624207980854",
+        "is_top": true
+       }
+      ],
+      "related_job_num": null
+     }
+    ],
+    "storefront_mode": 1,
+    "storefront_list": null,
+    "process_type": 2
+   },
+   {
+    "id": "7699705432584423722",
+    "title": "校招-产品采购（设备与服务）",
+    "sub_title": null,
+    "description": "1. 考察合作伙伴，了解合作伙伴的成本组成，交付质量，技术等综合能力，完成定期合作伙伴的评估/淘汰/准入准出等；\n2. 熟悉相关领域成本结构和价值链，有能力发掘成本优化空间，并和跨部门团队去实现发现的机会；\n3. 根据项目需求，跨部门沟通，主导并按时按质完成合作伙伴的寻源定点工作；熟悉项目招投标工作\n4. 和业务需求部门做充分需求方案讨论，平衡成本与技术，为公司争取最大利益；\n5. 基于不同品类制定品类策略，持续的成本优化和采购体系优化\n6. 负责相关项目过程谈判，合同条款签署，解决和支持项目开发过程中及落地当中的相关问题；\n7. 维护好的合作伙伴关系，增加合作伙伴粘性。",
+    "requirement": "1.本科及以上学历，理工科方向优先；\n2.为人真诚，对采购及供应链行业感兴趣\n3.熟练使用office等办公软件\n4.有较强的学习能力，抗压能力及应变能力",
+    "job_category": null,
+    "city_info": null,
+    "recruit_type": {
+     "id": "201",
+     "name": "正式",
+     "en_name": "Regular",
+     "i18n_name": "正式",
+     "depth": 2,
+     "parent": {
+      "id": "2",
+      "name": "校招",
+      "en_name": "Campus",
+      "i18n_name": "校招",
+      "depth": 1,
+      "parent": null,
+      "children": null,
+      "active_status": 1,
+      "selectability": 1
+     },
+     "children": null,
+     "active_status": 1,
+     "selectability": 1
+    },
+    "publish_time": 1792727750409,
+    "job_hot_flag": null,
+    "job_subject": {
+     "id": "7670808301186205962",
+     "name": {
+      "zh_cn": "2027届校园招聘-正式批",
+      "en_us": null,
+      "i18n": "2027届校园招聘-正式批"
+     },
+     "limit_count": null,
+     "active_status": 1,
+     "subject_group_info": null
+    },
+    "code": "A191667A",
+    "department_id": null,
+    "job_function": {
+     "id": "7257445594599819576",
+     "name": "采购与供应链",
+     "en_name": "Purchasing and Supply Chain",
+     "i18n_name": "采购与供应链",
+     "parent_id": null,
+     "index": null,
+     "active_status": null,
+     "biz_create_time": null,
+     "biz_modify_time": null,
+     "parent": {
+      "id": "7257443883902011707",
+      "name": "职能与支持",
+      "en_name": "Administration & Support",
+      "i18n_name": "职能与支持",
+      "parent_id": null,
+      "index": null,
+      "active_status": null,
+      "biz_create_time": null,
+      "biz_modify_time": null,
+      "parent": null
+     }
+    },
+    "job_process_id": "7649576413712910628",
+    "recommend_id": null,
+    "city_list": [
+     {
+      "code": "CT_125",
+      "name": "上海",
+      "en_name": "Shanghai",
+      "location_type": null,
+      "i18n_name": "上海",
+      "py_name": null,
+      "mdm_code": null,
+      "node_status": null
+     }
+    ],
+    "job_post_info": {
+     "id": null,
+     "job_id": null,
+     "title": null,
+     "sub_title": null,
+     "address_id": null,
+     "address": null,
+     "city": null,
+     "education": null,
+     "experience": null,
+     "description": null,
+     "requirement": null,
+     "min_salary": null,
+     "max_salary": null,
+     "currency": null,
+     "head_count": null,
+     "crator_id": null,
+     "expiry_time": null,
+     "progress": null,
+     "department_id": null,
+     "job_type": null,
+     "recruitment_type": {
+      "id": "201",
+      "name": "正式",
+      "en_name": "Regular",
+      "i18n_name": "正式",
+      "depth": 2,
+      "parent": {
+       "id": "2",
+       "name": "校招",
+       "en_name": "Campus",
+       "i18n_name": "校招",
+       "depth": 1,
+       "parent": null,
+       "children": null,
+       "active_status": 1,
+       "selectability": 1
+      },
+      "children": null,
+      "active_status": 1,
+      "selectability": 1
+     },
+     "job_process_time": null,
+     "job_in_charge_user_id": null,
+     "biz_create_time": null,
+     "HighlightList": null,
+     "JobChannelPublishList": null,
+     "required_degree": 6,
+     "never_expiry": null,
+     "job_hot_flag": null,
+     "subject": null,
+     "sequence": null,
+     "min_level": null,
+     "max_level": null,
+     "job_post_object_value_map": {},
+     "code": null,
+     "job_active_status": null,
+     "job_process_type": null,
+     "biz_modify_time": null,
+     "job_function": null,
+     "job_process": null,
+     "job_process_id": null,
+     "job_category": null,
+     "address_list": [
+      {
+       "id": "7158407724894666754",
+       "name": "田林路889号（漕宝路1355号）科技绿洲五期19号楼",
+       "en_name": "Building 19, CHJ Hi-Tech Oasis Phase 5, NO.889 Tianlin Road(No. 1355 Caobao Road), Minhang District, Shanghai",
+       "district": {
+        "district_code": "DS_215",
+        "name": "闵行区",
+        "en_name": "Minhang",
+        "i18n_name": "闵行区"
+       },
+       "city": {
+        "city_code": "CT_125",
+        "name": "上海",
+        "en_name": "Shanghai",
+        "i18n_name": "上海",
+        "py_name": "shanghai"
+       },
+       "state": {
+        "state_code": "ST_47",
+        "name": "上海",
+        "en_name": "Shanghai",
+        "i18n_name": "上海"
+       },
+       "country": {
+        "country_code": "CN_1",
+        "name": "中国大陆",
+        "en_name": "Chinese Mainland",
+        "i18n_name": "中国大陆"
+       },
+       "i18n_name": "田林路889号（漕宝路1355号）科技绿洲五期19号楼",
+       "active_status": 1
+      }
+     ],
+     "city_list": null,
+     "correlation_job_list": null,
+     "tag_list": null,
+     "department": null,
+     "job_storefront_mode": null,
+     "storefront_list": null,
+     "target_major_list": null,
+     "schema": null,
+     "job_post_process_time_list": null,
+     "job_level_id_list": null
+    },
+    "tag_list": [
+     {
+      "id": "7397248736818432295",
+      "name": {
+       "name": "推荐投递",
+       "en_name": "推荐投递",
+       "i18n_name": "推荐投递"
+      },
+      "order": 78,
+      "style": "{\"backgroundColor\":\"rgba(245, 74, 69, 0.2)\",\"color\":\"rgba(98, 28, 24, 1)\"}",
+      "scope_list": [
+       {
+        "id": "7397248954985564425",
+        "name": {
+         "name": "2027届蔚来校园招募",
+         "en_name": null,
+         "i18n_name": "2027届蔚来校园招募"
+        },
+        "channel_id": "7265158624207980854",
+        "is_top": true
+       }
+      ],
+      "related_job_num": null
+     }
+    ],
+    "storefront_mode": 1,
+    "storefront_list": null,
+    "process_type": 2
+   },
+   {
+    "id": "7676301029218076970",
+    "title": "校招-蔚来顾问-\"未来星\"营销管训班-上海",
+    "sub_title": null,
+    "description": "蔚来战略级人才发展项目,为全国锻造一线指挥官的\"汽车营销黄埔军校\"，以上海、合肥为核心培养基地进行为期1-2年的集中培养,向全国战场输送懂用户、善经营、能带队的将才军官。\n\n培养期间，作为用户用车全流程的朋友，我们期待你\n1、根据蔚来用户新范式指引，高效建立并维护与用户的全生命周期关系；\n2、根据蔚来品牌及产品特征，准确地向用户传递品牌及产品信息并耐心讲解，同时传递蔚来价值观；\n3、根据蔚来品牌试驾运营要求，为用户提供完整的试驾服务体验，不断增强用户对品牌的忠诚度；\n4、根据公司销售策略和团队目标，制定个人工作计划和目标任务，顺利完成车辆锁单，并协助完成交付工作；\n5、依托公司提供的营销产品，开展外拓活动，不断创新、积极主动地吸引并转化潜在用户；\n6、根据团队建设需要，积极承担人员带教工作并担任内训师，确保公司文化和价值观在新人中传承；\n7、根据业务发展需要，完成团队指定的其他工作。",
+    "requirement": "1、2027 届毕业生，本科及以上学历；\n2、C2及以上驾照，驾驶技术熟练；\n3、擅长沟通与表达，能主动对接用户需求，是团队内外的沟通枢纽；\n4、具备自主学习意识，能主动探索新知识、规划个人成长路径；\n5、目标感强，以结果为导向，能将目标拆解为可执行的动作并高效落地；\n6、适应快节奏的市场环境，敢于承接高难度目标，在压力中突破自我；\n7、愿意接受跨区域发展，适应不同城市和多元工作环境，并在其中沉淀成长；\n8、本岗位将邀请您提前参与带薪实习体验，快人一步，融入NIO，表现优异者可直发校招正式Offer！",
+    "job_category": null,
+    "city_info": null,
+    "recruit_type": {
+     "id": "202",
+     "name": "实习",
+     "en_name": "Intern",
+     "i18n_name": "实习",
+     "depth": 2,
+     "parent": {
+      "id": "2",
+      "name": "校招",
+      "en_name": "Campus",
+      "i18n_name": "校招",
+      "depth": 1,
+      "parent": null,
+      "children": null,
+      "active_status": 1,
+      "selectability": 1
+     },
+     "children": null,
+     "active_status": 1,
+     "selectability": 1
+    },
+    "publish_time": 1787278244725,
+    "job_hot_flag": null,
+    "job_subject": {
+     "id": "7652282084706453814",
+     "name": {
+      "zh_cn": "\"未来星\"营销管训班",
+      "en_us": null,
+      "i18n": "\"未来星\"营销管训班"
+     },
+     "limit_count": null,
+     "active_status": 1,
+     "subject_group_info": null
+    },
+    "code": "A84835",
+    "department_id": null,
+    "job_function": {
+     "id": "7257444123313080636",
+     "name": "蔚来顾问",
+     "en_name": "Fellow",
+     "i18n_name": "蔚来顾问",
+     "parent_id": null,
+     "index": null,
+     "active_status": null,
+     "biz_create_time": null,
+     "biz_modify_time": null,
+     "parent": {
+      "id": "7257443440471542077",
+      "name": "用户与服务",
+      "en_name": "User & Service Experience",
+      "i18n_name": "用户与服务",
+      "parent_id": null,
+      "index": null,
+      "active_status": null,
+      "biz_create_time": null,
+      "biz_modify_time": null,
+      "parent": null
+     }
+    },
+    "job_process_id": "7649576413712910628",
+    "recommend_id": null,
+    "city_list": [
+     {
+      "code": "CT_125",
+      "name": "上海",
+      "en_name": "Shanghai",
+      "location_type": null,
+      "i18n_name": "上海",
+      "py_name": null,
+      "mdm_code": null,
+      "node_status": null
+     }
+    ],
+    "job_post_info": {
+     "id": null,
+     "job_id": null,
+     "title": null,
+     "sub_title": null,
+     "address_id": null,
+     "address": null,
+     "city": null,
+     "education": null,
+     "experience": null,
+     "description": null,
+     "requirement": null,
+     "min_salary": null,
+     "max_salary": null,
+     "currency": null,
+     "head_count": null,
+     "crator_id": null,
+     "expiry_time": null,
+     "progress": null,
+     "department_id": null,
+     "job_type": null,
+     "recruitment_type": {
+      "id": "202",
+      "name": "实习",
+      "en_name": "Intern",
+      "i18n_name": "实习",
+      "depth": 2,
+      "parent": {
+       "id": "2",
+       "name": "校招",
+       "en_name": "Campus",
+       "i18n_name": "校招",
+       "depth": 1,
+       "parent": null,
+       "children": null,
+       "active_status": 1,
+       "selectability": 1
+      },
+      "children": null,
+      "active_status": 1,
+      "selectability": 1
+     },
+     "job_process_time": null,
+     "job_in_charge_user_id": null,
+     "biz_create_time": null,
+     "HighlightList": null,
+     "JobChannelPublishList": null,
+     "required_degree": 6,
+     "never_expiry": null,
+     "job_hot_flag": null,
+     "subject": null,
+     "sequence": null,
+     "min_level": null,
+     "max_level": null,
+     "job_post_object_value_map": {},
+     "code": null,
+     "job_active_status": null,
+     "job_process_type": null,
+     "biz_modify_time": null,
+     "job_function": null,
+     "job_process": null,
+     "job_process_id": null,
+     "job_category": null,
+     "address_list": [
+      {
+       "id": "7517455134663180291",
+       "name": "同济路669弄4号的上海宝杨宝龙广场M1- L1-075-2乐道汽车",
+       "en_name": "",
+       "district": {
+        "district_code": "DS_310113",
+        "name": "宝山区",
+        "en_name": "Baoshan",
+        "i18n_name": "宝山区"
+       },
+       "city": {
+        "city_code": "CT_125",
+        "name": "上海",
+        "en_name": "Shanghai",
+        "i18n_name": "上海",
+        "py_name": "shanghai"
+       },
+       "state": {
+        "state_code": "ST_47",
+        "name": "上海",
+        "en_name": "Shanghai",
+        "i18n_name": "上海"
+       },
+       "country": {
+        "country_code": "CN_1",
+        "name": "中国大陆",
+        "en_name": "Chinese Mainland",
+        "i18n_name": "中国大陆"
+       },
+       "i18n_name": "同济路669弄4号的上海宝杨宝龙广场M1- L1-075-2乐道汽车",
+       "active_status": 1
+      }
+     ],
+     "city_list": null,
+     "correlation_job_list": null,
+     "tag_list": null,
+     "department": null,
+     "job_storefront_mode": null,
+     "storefront_list": null,
+     "target_major_list": null,
+     "schema": null,
+     "job_post_process_time_list": null,
+     "job_level_id_list": null
+    },
+    "tag_list": [
+     {
+      "id": "7397248736818432295",
+      "name": {
+       "name": "推荐投递",
+       "en_name": "推荐投递",
+       "i18n_name": "推荐投递"
+      },
+      "order": 78,
+      "style": "{\"backgroundColor\":\"rgba(245, 74, 69, 0.2)\",\"color\":\"rgba(98, 28, 24, 1)\"}",
+      "scope_list": [
+       {
+        "id": "7397248954985564425",
+        "name": {
+         "name": "2027届蔚来校园招募",
+         "en_name": null,
+         "i18n_name": "2027届蔚来校园招募"
+        },
+        "channel_id": "7265158624207980854",
+        "is_top": true
+       }
+      ],
+      "related_job_num": null
+     },
+     {
+      "id": "7394352401153657142",
+      "name": {
+       "name": "NIO蔚来区域公司",
+       "en_name": "NIO蔚来区域公司",
+       "i18n_name": "NIO蔚来区域公司"
+      },
+      "order": 65,
+      "style": "{\"backgroundColor\":\"rgba(51, 112, 255, 0.2)\",\"color\":\"rgba(12, 41, 110, 1)\"}",
+      "scope_list": [
+       {
+        "id": "7395023714130413863",
+        "name": {
+         "name": "2027届蔚来校园招募",
+         "en_name": null,
+         "i18n_name": "2027届蔚来校园招募"
+        },
+        "channel_id": "7265158624207980854",
+        "is_top": false
+       },
+       {
+        "id": "7395023714130430247",
+        "name": {
+         "name": "社招 - 内部招聘（活水）",
+         "en_name": null,
+         "i18n_name": "社招 - 内部招聘（活水）"
+        },
+        "channel_id": "7308627545279498522",
+        "is_top": false
+       },
+       {
+        "id": "7395023714130446631",
+        "name": {
+         "name": "校招 - 内部招聘（活水）",
+         "en_name": null,
+         "i18n_name": "校招 - 内部招聘（活水）"
+        },
+        "channel_id": "7199916090423691531",
+        "is_top": false
+       },
+       {
+        "id": "7395023714130463015",
+        "name": {
+         "name": "社招 - 日常实习生官网",
+         "en_name": null,
+         "i18n_name": "社招 - 日常实习生官网"
+        },
+        "channel_id": "7106738302368319775",
+        "is_top": false
+       },
+       {
+        "id": "7395023714130495783",
+        "name": {
+         "name": "社招 - 全职官网",
+         "en_name": "Experienced Hire Official Website",
+         "i18n_name": "社招 - 全职官网"
+        },
+        "channel_id": "6982453675377821966",
+        "is_top": false
+       },
+       {
+        "id": "7395023714130512167",
+        "name": {
+         "name": "内推平台",
+         "en_name": "Referral platform",
+         "i18n_name": "内推平台"
+        },
+        "channel_id": "3",
+        "is_top": false
+       }
+      ],
+      "related_job_num": null
+     }
+    ],
+    "storefront_mode": 1,
+    "storefront_list": null,
+    "process_type": 2
+   }
+  ],
+  "count": 869,
+  "extra": "{\"fe_tracking\":{\"log_id\":\"20261025113400CD3EF53382F0BCA5161B\",\"query_length\":0,\"total\":869}}"
+ },
+ "message": "ok",
+ "error": null
+}

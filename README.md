@@ -1,132 +1,110 @@
-# JobClaw
+# campus-radar 校招雷达
 
-JobClaw 是一款面向校招和实习的求职信息管理应用。它把分散在招聘网页、公告、表格和图片中的职位线索整理到同一个地方，帮助你筛选机会、记录投递进展，并通过对话查询适合自己的岗位。
+国内校招岗位的数据层：每天从各公司**校招官网**采集岗位，统一成一个岗位库，再通过 **MCP** 开放给任意 Agent（Claude、Grok Bot、Muse 等）使用。
 
-## 可以做什么
+为什么做成「被 Agent 调用的一层」而不是又一个 Agent：通用 Agent 每次现上网搜，校招信息会漏、会重、会过期；它们缺的是一份准确、持续更新的国内校招数据。这个项目只做这一件事，并把它做准。
 
-- **查找岗位**：按公司、岗位、地点、招聘类型和招聘对象筛选，查看招聘详情与原始投递链接。
-- **管理求职进展**：在「我的求职」中收藏岗位，记录 `SAVED`、`APPLIED`、`INTERVIEW`、`OFFER`、`REJECTED`、`WITHDRAWN` 状态，补充备注和跟进日期。每个用户的记录独立保存。
-- **整理招聘线索**：管理员导入链接、文本、Excel／CSV 或图片，提取结构化职位草稿，核对和修改后发布到职位库。
-- **追踪信息来源**：保留采集来源、执行记录和草稿结果，方便检查与重新采集。
-- **使用求职助手**：通过 Web 对话维护求职偏好、查询和推荐职位；也可配置微信、钉钉或飞书入口。
-- **连接 AI 客户端**：通过 MCP 接口查询职位，在后台管理模型供应商及查看模型调用记录。
+## 当前覆盖
 
-常见使用流程：导入招聘线索 → 审核职位 → 筛选并收藏 → 记录投递与面试进展。
+14 个数据源，约 1.3 万个在招岗位（2026-10-25）。
 
-## 本地运行
+**飞书招聘通用适配器**（`FeishuAtsCollector`，在 `application.yml` 的 `radar.feishu-sites` 里加一行即可接入新公司）：
 
-需要 Java 21；前端源码运行还需要 Node.js 18.19+ 和 pnpm 11。模型接口、外部聊天渠道和 MySQL 均需使用自己的配置。
+| 公司 | 编码 | 站点 |
+| --- | --- | --- |
+| 字节跳动 | `bytedance` | jobs.bytedance.com（同一套系统，约 7000 个岗位） |
+| 小鹏汽车 | `xiaopeng` | xiaopeng.jobs.feishu.cn |
+| 蔚来 | `nio` | nio.jobs.feishu.cn |
+| 中科创达 | `thundersoft` | thundersoft.jobs.feishu.cn |
+| 影石Insta360 | `insta360` | arashivision.jobs.feishu.cn |
+| 面壁智能 | `modelbest` | modelbest.jobs.feishu.cn |
+| 德赛西威 | `desaysv` | yesv-desaysv.jobs.feishu.cn（不返回招聘类型，按标题判断实习） |
 
-### 推荐：一键启动本地体验
+**官网专用采集器**：
 
-在仓库根目录执行：
+| 数据源 | 编码 | 采集方式 | 说明 |
+| --- | --- | --- | --- |
+| 阿里巴巴 | `alibaba` | XSRF cookie + `listBatch` 动态发现当届批次 | 应届生 + 实习批次 |
+| 腾讯 | `tencent` | 列表 + 逐个拉详情（只拉新岗位） | 列表接口不带 JD |
+| 美团 | `meituan` | `jobType` 1 校招 / 2 实习 | |
+| 快手 | `kuaishou` | `recruitSubProjectCodes` 传空数组返回全部项目 | |
+| 百度 | `baidu` | 表单 POST，每页最多 20 | 岗位名去掉城市前缀和编号 |
+| 京东 | `jd` | `pageIndex` 从 0 开始 | 城市在 `requirementVoList` 里 |
+| 拼多多 | `pdd` | 服务端固定每页 10 条 | 只有应届生页，实习页待接 |
 
-```bash
-./scripts/start-local.sh
-```
+待接入：网易（校招站需要先选项目）、华为（WAF 拦截裸请求，需要浏览器）、Moka（接口响应加密，只读渲染后的页面）、拼多多和京东的实习页。
 
-脚本会检查 Java、Node.js、pnpm、端口和前端依赖，准备后端模块，启动 8087 后端与 3000 前端，并等待两个入口真正可访问。首次使用如果提示前端依赖未安装，先执行：
+## 快速开始
 
-```bash
-cd ui-react
-pnpm install --frozen-lockfile
-cd ..
-./scripts/start-local.sh
-```
-
-启动日志保存在被 Git 忽略的 `.jobclaw-dev/`，停止服务执行 `./scripts/stop-local.sh`。脚本不会自动覆盖已有 `.env`，也不会把前端构建产物复制到后端静态目录。
-
-### 启动后端
-
-在仓库根目录执行：
+需要 Java 21+ 和 Maven。
 
 ```bash
-cp .env.example .env
-./mvnw -DskipTests install
-./mvnw spring-boot:run -pl app
+mvn -DskipTests package
+java -jar target/campus-radar-0.1.0-SNAPSHOT.jar
 ```
 
-默认使用 H2 文件数据库，无需安装 MySQL。运行数据保存在 `workspace/`，该目录和 `.env` 不会提交到 Git。
-
-- 后端地址：<http://localhost:8087>
-- 健康检查：<http://localhost:8087/actuator/health>
-- 默认 H2 账号为 `sa`，密码为空。
-
-开发环境首次启动空的 H2 职位库时，会自动写入 4 条带有「JobClaw 演示」标记的岗位，方便直接体验搜索、详情、收藏和投递跟踪闭环。这些岗位没有真实投递链接，也不代表实际招聘信息；如需关闭，启动前设置 `JOBCLAW_DEMO_DATA_ENABLED=false`。MySQL 和生产配置默认不会写入演示数据。
-
-开发环境默认关闭岗位会员门槛，普通用户可以完整体验详情、保存和投递跟踪；MySQL 测试环境和生产环境默认保留会员限制。如需在本地复现会员策略，可设置 `JOBCLAW_MEMBERSHIP_REQUIRE_VIP=true`。
-
-本地环境提供开发登录入口。使用 AI 提取和对话功能前，在管理后台的「LLM供应商」页面填写 API Key、接口地址和模型；查看已有职位及管理求职记录不需要调用模型。
-
-### 启动最新前端
-
-新页面请通过前端开发服务访问。先运行带检查的启动脚本，它会在依赖缺失时立即给出安装命令，并提示后端是否已经启动：
+服务默认监听 `8090`，数据存在 `./data/`（H2 文件库）。每天北京时间 7 点自动采集；也可以手动触发（只允许本机调用）：
 
 ```bash
-cd ui-react
-node scripts/start-dev.mjs
+# 采集单个数据源（同步返回本次结果）
+curl -X POST http://127.0.0.1:8090/api/admin/collect/bytedance
+# 后台采集全部数据源
+curl -X POST http://127.0.0.1:8090/api/admin/collect
 ```
 
-如果检查提示依赖未安装，再执行一次依赖安装：
+## 接入 Agent
 
-```bash
-pnpm install --frozen-lockfile
-node scripts/start-dev.mjs
-```
+MCP 端点：`http://<host>:8090/mcp`，传输方式 Streamable HTTP。
 
-无网络但本机已有完整 pnpm 缓存时，可以改用 `pnpm install --offline --frozen-lockfile`。也可以单独运行 `node scripts/frontend-doctor.mjs` 查看 Node.js、依赖、npm Registry 和后端健康检查结果。仓库已将 pnpm 的依赖校验设为先报错再停止，依赖未安装完成时不会自动同步 547 个包；推荐使用上面的启动脚本获得更具体的中文诊断。
-
-打开 <http://localhost:3000>，页面默认连接 `localhost:8087` 的后端。后端附带一份静态页面，但可能落后于前端源码；本轮新增的「我的求职」页面请在 `3000` 端口使用。
-
-### 使用 MySQL（可选）
-
-在 `.env` 中设置数据库连接：
-
-```dotenv
-JOBCLAW_DATABASE_NAME=jobclaw
-DATABASE_HOST=localhost
-DATABASE_PORT=3306
-DATABASE_USERNAME=root
-DATABASE_PASSWORD=your-password
-```
-
-随后从仓库根目录执行：
-
-```bash
-./mvnw -Ptest -DskipTests install
-./mvnw -Ptest -pl app spring-boot:run
-```
-
-数据库方案由 Maven profile 选择：默认 `dev` 使用 H2 和 Hibernate 建表，`test` 使用 MySQL 和 Liquibase。只修改 `.env` 不会切换数据库类型。
-
-## 代码结构
-
-| 目录 | 职责 |
+| 工具 | 作用 |
 | --- | --- |
-| `app/` | Web API、职位与求职记录、管理后台、数据持久化、MCP 服务 |
-| `core/` | 消息路由、会话、Agent 注册、模型解析和对话记忆 |
-| `agents/` | 用户信息采集、职位提取和职位推荐 |
-| `channels/` | WebSocket、微信、钉钉、飞书消息入口 |
-| `providers/` | 模型服务商适配 |
-| `plugins/` | 浏览器、职位库检索和计划工具 |
-| `ui-react/` | React / Next.js Web 界面 |
+| `search_jobs` | 按关键词、公司、城市、校招/实习、届别、最近 N 天检索在招岗位；有关键词按相关度排序，不限公司时各公司穿插，返回 JD 命中片段 |
+| `get_job` | 查看单个岗位的完整 JD 和官网投递链接 |
+| `list_sources` | 每家公司在招岗位数和最近一次采集时间 |
 
-后端使用 Java 21、Spring Boot 4、Spring AI、Spring Modulith、LangGraph4J 和 JPA；前端使用 React 19、Next.js 15、TailwindCSS 和 shadcn/ui。模型与聊天入口采用独立模块，业务功能通过共享的会话和工具接口连接。
+公司名支持简称和英文名（字节、ByteDance、阿里、PDD 等）；没收录的公司会返回 `isError` 和已收录公司列表。
 
-## 当前边界
-
-- 开发环境的演示岗位只用于体验流程；真实招聘信息仍需要管理员导入或采集，发布前应核对原始来源。
-- 职位信息的完整性与时效性取决于原始来源；AI 提取结果应核对后再发布，投递前请确认招聘方原始页面。
-- 外部网页可能有登录、验证码或访问限制，无法保证所有招聘网站都能采集。
-- 「我的求职」记录需要手动更新，当前不会自动向招聘网站提交简历或同步投递结果。
-- 微信、钉钉、飞书及模型服务需单独配置。本地开发登录仅用于本地体验，不应用于公开部署。
-
-## 开发验证
+**Claude Code**
 
 ```bash
-# 仓库根目录
-./mvnw test
-
-# ui-react 目录：仅构建，不更新后端静态页面
-pnpm build
+claude mcp add --transport http campus-radar http://localhost:8090/mcp
 ```
+
+**云端 Agent（Grok Bot、Muse 等）**：它们跑在自己的云端机器上，访问不到你电脑的 `localhost`。需要先开启令牌，再用隧道暴露一个公网地址：
+
+```bash
+RADAR_MCP_TOKEN=换成一串足够长的随机字符 java -jar target/campus-radar-0.1.0-SNAPSHOT.jar
+cloudflared tunnel --url http://localhost:8090
+```
+
+然后在 Agent 的 connector / MCP 设置里填 `https://<隧道地址>/mcp`，请求头 `Authorization: Bearer <令牌>`。
+
+- 配置令牌后，`/mcp` 和 `/api/**` 都需要带令牌。
+- `/api/admin/**`（手动触发采集）只接受直连本机的请求，经隧道或反向代理转发进来的请求一律 403，带令牌也不行。
+- Homebrew 装不上 cloudflared 时，可以直接从 [cloudflared Releases](https://github.com/cloudflare/cloudflared/releases) 下载对应系统的二进制。
+
+## REST 接口
+
+- `GET /api/jobs?keyword=&company=&city=&recruitType=校招&gradYear=&sinceDays=&limit=20`
+- `GET /api/jobs/{id}`
+- `GET /api/sources`
+
+## 设计要点
+
+- **增量采集**：岗位按 `(source, externalId)` 唯一；内容摘要没变只刷新 `lastSeenAt`；本轮没再出现的岗位标记为 `CLOSED`，不删除。
+- **健康检查**：本轮条数低于上次成功采集的一半时，标记 `WARN` 并**跳过下线**，避免接口改版或风控导致整批岗位被误下线。
+- **只对新岗位拉详情**：腾讯这类列表不带 JD 的来源，已有 JD 的岗位沿用库里内容，每天只多请求新增的那部分。
+- **解析与请求分离**：每个采集器的解析方法用录制的真实响应测试（`src/test/resources/fixtures`），接口改版时先更新 fixture 再看哪条断言失败。
+
+## 采集边界
+
+- 只采公司校招官网公开的岗位，低频请求（同一来源请求间隔 ≥ 400ms，每天一轮），保留原文链接，引导用户回官网投递。
+- 不破解加密接口，不绕过验证码和风控。
+- 不搬运牛客等聚合平台整理的内容；它们只作为「哪家开招了」的线索来源。
+
+## 路线图
+
+- **P0（当前）**：官网采集、统一岗位库、只读 MCP
+- **P1**：飞书招聘 / 华为 / Moka 浏览器采集；个人档案与 `match_jobs` 打分；微信每日推送
+- **P2**：按 JD 定制简历（起草 + 事实校验）、投递台账、邮件解析自动更新进度
+- **P3**：浏览器插件填网申表、海外数据源
