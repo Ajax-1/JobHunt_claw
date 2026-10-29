@@ -12,8 +12,9 @@ import org.springframework.context.annotation.Configuration;
 public class McpConfig {
 
     @Bean
-    public ToolCallbackProvider jobToolCallbacks(JobTools jobTools) {
-        return MethodToolCallbackProvider.builder().toolObjects(jobTools).build();
+    public ToolCallbackProvider jobToolCallbacks(JobTools jobTools, ProfileTools profileTools,
+                                                 ApplicationTools applicationTools) {
+        return MethodToolCallbackProvider.builder().toolObjects(jobTools, profileTools, applicationTools).build();
     }
 
     /**
